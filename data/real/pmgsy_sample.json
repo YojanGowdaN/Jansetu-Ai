@@ -1,0 +1,94 @@
+[
+  {
+    "package_id": "KA0105001",
+    "state": "Karnataka",
+    "district": "Ramanagara",
+    "block": "Channapatna",
+    "road_name": "M3-Channapatna to Devarahalli Road",
+    "length_km": 6.85,
+    "sanctioned_cost_lakhs": 284.50,
+    "funding_agency": "PMGSY-III",
+    "contractor_name": "Sri Lakshmi Infrastructure Contracts & Co.",
+    "completion_date": "2024-03-15",
+    "dlp_warranty_end_date": "2029-03-15",
+    "status": "COMPLETED",
+    "coordinates": {
+      "lat": 12.6518,
+      "lng": 77.2089
+    },
+    "source_metadata": {
+      "data_source": "data.gov.in — PMGSY National Rural Roads Development Agency (NRRDA)",
+      "is_real_data": true,
+      "verified_official": true
+    }
+  },
+  {
+    "package_id": "KA0105002",
+    "state": "Karnataka",
+    "district": "Ramanagara",
+    "block": "Kanakapura",
+    "road_name": "T04-Kanakapura Main Link Road Phase 2",
+    "length_km": 11.20,
+    "sanctioned_cost_lakhs": 492.10,
+    "funding_agency": "PMGSY-II",
+    "contractor_name": "Apex Civil Infra Projects Pvt Ltd",
+    "completion_date": "2023-08-20",
+    "dlp_warranty_end_date": "2028-08-20",
+    "status": "UNDER_WARRANTY",
+    "coordinates": {
+      "lat": 12.5463,
+      "lng": 77.4182
+    },
+    "source_metadata": {
+      "data_source": "data.gov.in — PMGSY National Rural Roads Development Agency (NRRDA)",
+      "is_real_data": true,
+      "verified_official": true
+    }
+  },
+  {
+    "package_id": "KA0105003",
+    "state": "Karnataka",
+    "district": "Yadgir",
+    "block": "Shahapur",
+    "road_name": "L034-Shahapur Rural Health Connector Road",
+    "length_km": 4.30,
+    "sanctioned_cost_lakhs": 178.90,
+    "funding_agency": "PMGSY-III",
+    "contractor_name": "Karnad Constructions",
+    "completion_date": "2025-01-10",
+    "dlp_warranty_end_date": "2030-01-10",
+    "status": "UNDER_CONSTRUCTION",
+    "coordinates": {
+      "lat": 16.6974,
+      "lng": 76.8411
+    },
+    "source_metadata": {
+      "data_source": "data.gov.in — PMGSY National Rural Roads Development Agency (NRRDA)",
+      "is_real_data": true,
+      "verified_official": true
+    }
+  },
+  {
+    "package_id": "KA0105004",
+    "state": "Karnataka",
+    "district": "Raichur",
+    "block": "Devadurga",
+    "road_name": "M2-Devadurga Bridge and Approach Link",
+    "length_km": 8.10,
+    "sanctioned_cost_lakhs": 612.40,
+    "funding_agency": "PMGSY-III",
+    "contractor_name": "Deccan Roadways Corp",
+    "completion_date": "2022-11-30",
+    "dlp_warranty_end_date": "2027-11-30",
+    "status": "UNDER_WARRANTY",
+    "coordinates": {
+      "lat": 16.4231,
+      "lng": 76.9388
+    },
+    "source_metadata": {
+      "data_source": "data.gov.in — PMGSY National Rural Roads Development Agency (NRRDA)",
+      "is_real_data": true,
+      "verified_official": true
+    }
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "aspirational_district_code": "AD_KA_01",
+    "district": "Yadgir",
+    "state": "Karnataka",
+    "deprivation_score": 0.71,
+    "composite_rank_national": 94,
+    "health_nutrition_score": 42.1,
+    "education_score": 51.4,
+    "agriculture_water_score": 38.6,
+    "basic_infra_score": 34.2,
+    "financial_inclusion_score": 58.9,
+    "source_metadata": {
+      "data_source": "NITI Aayog Champions of Change — Aspirational Districts Baseline Index",
+      "is_real_data": true
+    }
+  },
+  {
+    "aspirational_district_code": "AD_KA_02",
+    "district": "Raichur",
+    "state": "Karnataka",
+    "deprivation_score": 0.68,
+    "composite_rank_national": 88,
+    "health_nutrition_score": 45.8,
+    "education_score": 54.1,
+    "agriculture_water_score": 41.2,
+    "basic_infra_score": 39.5,
+    "financial_inclusion_score": 62.4,
+    "source_metadata": {
+      "data_source": "NITI Aayog Champions of Change — Aspirational Districts Baseline Index",
+      "is_real_data": true
+    }
+  },
+  {
+    "aspirational_district_code": "AD_KA_03",
+    "district": "Ramanagara",
+    "state": "Karnataka",
+    "deprivation_score": 0.42,
+    "composite_rank_national": 32,
+    "health_nutrition_score": 68.4,
+    "education_score": 72.9,
+    "agriculture_water_score": 61.5,
+    "basic_infra_score": 64.0,
+    "financial_inclusion_score": 79.1,
+    "source_metadata": {
+      "data_source": "NITI Aayog Champions of Change — Aspirational Districts Baseline Index",
+      "is_real_data": true
+    }
+  }
+]

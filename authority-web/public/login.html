@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JanSetu AI — Government Authority Access Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        serif: ['"Noto Serif"', 'serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#091426',
+                            container: '#1E293B',
+                            fixed: '#D8E3FB',
+                        },
+                        secondary: {
+                            DEFAULT: '#855300',
+                            container: '#FEA619',
+                            fixed: '#FFDDB8',
+                        },
+                        surface: {
+                            DEFAULT: '#FAF9F8',
+                            bright: '#FFFFFF',
+                            dim: '#DADAD9',
+                            container: {
+                                lowest: '#FFFFFF',
+                                low: '#F4F3F2',
+                                DEFAULT: '#EEEEED',
+                                high: '#E9E8E7',
+                                highest: '#E3E2E1',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ─── Light Mode Defaults ───────────────────────────────── */
+        body {
+            background-color: #FAF9F8;
+            color: #1A1C1C;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(227, 226, 225, 0.9);
+            box-shadow: 0 20px 35px -10px rgba(9, 20, 38, 0.06), 0 10px 15px -5px rgba(9, 20, 38, 0.03);
+        }
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(9, 20, 38, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(9, 20, 38, 0.03) 1px, transparent 1px);
+        }
+
+        /* ─── Dark Mode Overrides ──────────────────────────────── */
+        .dark body, body.dark {
+            background-color: #090D16 !important;
+            color: #F0E0D1 !important;
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+        }
+        .dark .bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        }
+    </style>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('jansetu_theme') || 'light';
+            if (saved === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-[#FAF9F8] dark:bg-[#090D16] text-[#1A1C1C] dark:text-[#F0E0D1] font-sans min-h-screen flex flex-col justify-between bg-grid relative overflow-x-hidden selection:bg-amber-500 selection:text-white antialiased">
+
+    <!-- National Top Accent -->
+    <div class="w-full bg-gradient-to-r from-orange-500 via-white to-emerald-500 h-1 sticky top-0 z-50"></div>
+
+    <!-- Header Navigation -->
+    <header class="w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-3.5 shadow-xs">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-black text-white text-base shadow-sm">
+                        JS
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">JanSetu <span class="text-amber-500">AI</span></span>
+                        <span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Authority</span>
+                    </div>
+                </a>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-semibold" title="Toggle Theme">
+                    <span id="theme-icon">🌙</span>
+                    <span id="theme-label" class="hidden sm:inline">Theme</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-xl mx-auto px-4 py-8 w-full flex flex-col justify-center space-y-6">
+        
+        <div class="text-center space-y-1.5">
+            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Authority Sign-In</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                Choose a demo persona or enter departmental credentials:
+            </p>
+        </div>
+
+        <!-- Sleek Persona Selector Pills -->
+        <div class="flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+            <button type="button" onclick="selectRole('field@jansetu.gov.in', 'field123', 'Field Officer (AEE PWD)', 'FIELD_OFFICER', this)" class="persona-pill px-3 py-1.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                Field Officer (T1)
+            </button>
+            <button type="button" onclick="selectRole('dept@jansetu.gov.in', 'dept123', 'Department Officer (EE Rural Roads)', 'DEPARTMENT_OFFICER', this)" class="persona-pill px-3 py-1.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                Dept Engineer (T2)
+            </button>
+            <button type="button" onclick="selectRole('district@jansetu.gov.in', 'district123', 'District Magistrate (DC Yadgir)', 'DISTRICT_AUTHORITY', this)" class="persona-pill px-3 py-1.5 rounded-xl font-bold bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 shadow-xs border border-slate-200 dark:border-slate-700 transition-all">
+                District Magistrate (T3)
+            </button>
+            <button type="button" onclick="selectRole('state@jansetu.gov.in', 'state123', 'State Authority (Addl Chief Secretary)', 'STATE_AUTHORITY', this)" class="persona-pill px-3 py-1.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                State Secretary (T4)
+            </button>
+            <button type="button" onclick="selectRole('national@jansetu.gov.in', 'national123', 'National Policymaker (Secretary MoRD)', 'NATIONAL_POLICYMAKER', this)" class="persona-pill px-3 py-1.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                National Ministry (T5)
+            </button>
+        </div>
+
+        <!-- Clean Login Card -->
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-md space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-slate-400">Authenticated Role</span>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white" id="selected-role-name">District Magistrate (DC Yadgir)</h3>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    🟢 Ready
+                </span>
+            </div>
+
+            <!-- Error Box -->
+            <div id="login-error" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-medium"></div>
+
+            <form id="authority-form" onsubmit="handleAuthorityLogin(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Official Email</label>
+                    <input type="email" id="auth-email" value="district@jansetu.gov.in" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Security Passcode</label>
+                    <input type="password" id="auth-password" value="district123" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+
+                <button type="submit" id="auth-btn" class="w-full bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all flex justify-center items-center text-xs gap-1.5 mt-2">
+                    <span id="auth-btn-text">Sign In as Authorized Official</span>
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    <span id="auth-spinner" class="hidden ml-1 animate-spin h-3.5 w-3.5 border-2 border-white dark:border-[#091426] border-t-transparent rounded-full"></span>
+                </button>
+            </form>
+
+            <p class="text-[11px] text-slate-400 text-center pt-2">
+                🔒 Audit Logging Active &bull; Sovereign DPI Government Infrastructure
+            </p>
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 py-4 px-6 text-center text-xs text-slate-500">
+        <p>JanSetu AI &copy; 2026 &middot; National Authority Command Center &middot; Sovereign Cloud Infrastructure</p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        // ─── Theme Controller (Default Light Mode) ───────────────────────────
+        function updateThemeUI() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            const btn = document.getElementById('theme-toggle-btn');
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = 'Light Mode';
+                if (btn) btn.title = 'Switch to Light Mode';
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = 'Dark Mode';
+                if (btn) btn.title = 'Switch to Dark Mode';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('jansetu_theme', nextTheme);
+            updateThemeUI();
+        }
+
+        updateThemeUI();
+
+        // Check if already logged in
+        if (localStorage.getItem('auth_token') && localStorage.getItem('auth_user')) {
+            window.location.href = '/dashboard';
+        }
+
+        function selectRole(email, pass, name, role, btnEl) {
+            document.getElementById('auth-email').value = email;
+            document.getElementById('auth-password').value = pass;
+            document.getElementById('selected-role-name').textContent = name;
+            
+            if (btnEl) {
+                document.querySelectorAll('.persona-pill').forEach(el => {
+                    el.className = "persona-pill px-3 py-1.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all";
+                });
+                btnEl.className = "persona-pill px-3 py-1.5 rounded-xl font-bold bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 shadow-xs border border-slate-200 dark:border-slate-700 transition-all";
+            }
+        }
+
+        async function handleAuthorityLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const errBox = document.getElementById('login-error');
+            const btn = document.getElementById('auth-btn');
+            const btnText = document.getElementById('auth-btn-text');
+            const spinner = document.getElementById('auth-spinner');
+
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            btnText.textContent = 'Verifying Authorization...';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/authority-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('auth_user', JSON.stringify(data.user));
+                    btnText.textContent = 'Access Granted!';
+                    setTimeout(() => { window.location.href = '/dashboard'; }, 600);
+                } else {
+                    errBox.textContent = data.error || 'Invalid credentials.';
+                    errBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                errBox.textContent = 'Connection error with JanSetu Central Backend.';
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.textContent = 'Sign In as Authorized Official';
+            }
+        }
+    </script>
+</body>
+</html>

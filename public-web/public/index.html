@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JanSetu AI — Citizen Reporting Studio & Public Accountability</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        serif: ['"Noto Serif"', 'serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#091426',
+                            container: '#1E293B',
+                            fixed: '#D8E3FB',
+                        },
+                        secondary: {
+                            DEFAULT: '#855300',
+                            container: '#FEA619',
+                            fixed: '#FFDDB8',
+                        },
+                        surface: {
+                            DEFAULT: '#FAF9F8',
+                            bright: '#FFFFFF',
+                            dim: '#DADAD9',
+                            container: {
+                                lowest: '#FFFFFF',
+                                low: '#F4F3F2',
+                                DEFAULT: '#EEEEED',
+                                high: '#E9E8E7',
+                                highest: '#E3E2E1',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ─── Light Mode Default Theme ──────────────────────────── */
+        body {
+            background-color: #FAF9F8;
+            color: #1A1C1C;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(227, 226, 225, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(9, 20, 38, 0.05), 0 8px 10px -6px rgba(9, 20, 38, 0.03);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(227, 226, 225, 0.85);
+            box-shadow: 0 4px 14px rgba(9, 20, 38, 0.04);
+        }
+        .bg-grid {
+            background-size: 36px 36px;
+            background-image: 
+                linear-gradient(to right, rgba(9, 20, 38, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(9, 20, 38, 0.03) 1px, transparent 1px);
+        }
+        .sound-wave-bar {
+            animation: soundWave 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes soundWave {
+            0% { height: 4px; }
+            100% { height: 26px; }
+        }
+
+        /* ─── Dark Mode Overrides ──────────────────────────────── */
+        .dark body, body.dark {
+            background-color: #090D16 !important;
+            color: #F0E0D1 !important;
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .dark .bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('jansetu_theme') || 'light';
+            if (saved === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-[#FAF9F8] dark:bg-[#090D16] text-[#1A1C1C] dark:text-[#F0E0D1] font-sans min-h-screen flex flex-col bg-grid antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- National Accent Strip -->
+    <div class="w-full bg-gradient-to-r from-orange-500 via-white to-emerald-500 h-1 sticky top-0 z-50"></div>
+
+    <!-- Header Navigation -->
+    <header class="bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md sticky top-1 z-40 px-4 sm:px-8 py-3.5 shadow-xs">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="flex items-center space-x-2.5 group">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-black text-white text-base shadow-sm">
+                        JS
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">JanSetu <span class="text-amber-500">AI</span></span>
+                        <span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Citizen</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-semibold" title="Toggle Theme">
+                    <span id="theme-icon">🌙</span>
+                    <span id="theme-label" class="hidden sm:inline">Theme</span>
+                </button>
+
+                <div class="relative">
+                    <button onclick="toggleNotifications()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors relative">
+                        <span class="material-symbols-outlined text-[18px]">notifications</span>
+                        <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-amber-500 text-white font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
+                    </button>
+                    <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-72 sm:w-80 glass-panel rounded-2xl shadow-xl p-4 z-50 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-800 mb-2.5">
+                            <span class="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">Live Updates</span>
+                            <button onclick="loadNotifications()" class="text-xs text-amber-600 dark:text-amber-400 hover:underline font-semibold">Refresh</button>
+                        </div>
+                        <div id="notif-list" class="space-y-2 max-h-56 overflow-y-auto text-xs">
+                            <p class="text-slate-500 dark:text-slate-400 text-center py-3">No notifications yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="user-display" class="font-bold text-slate-800 dark:text-slate-200">Arjun Kumar</span>
+                </div>
+
+                <a href="/track" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px] text-amber-500">analytics</span>
+                    <span>Track</span>
+                </a>
+
+                <button onclick="handleLogout()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full space-y-10 flex-1">
+        
+        <!-- Clean Hero & Reporting Intake Box -->
+        <section class="max-w-3xl mx-auto space-y-6">
+            <div class="text-center space-y-1.5">
+                <h1 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    Report a Civic Issue
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
+                    Type in any regional language, speak via mic, or attach photos. JanSetu AI analyzes urgency and notifies local authorities.
+                </p>
+            </div>
+
+            <!-- Unified Minimalist Reporting Card -->
+            <div class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-md space-y-4">
+                <form id="submit-form" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div id="submit-alert" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-medium"></div>
+
+                    <!-- Textarea -->
+                    <div class="relative">
+                        <textarea id="issue-text" rows="3" required
+                            class="w-full resize-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-sm leading-relaxed"
+                            placeholder="Describe what's broken (e.g., Road pothole on Shahapur main road, water pipeline leaking for 2 days, dark streetlights)..."></textarea>
+                    </div>
+
+                    <!-- Action Bar: Mic, Photo, Location & Submit -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Voice Input Button -->
+                            <button type="button" id="voice-btn" onclick="toggleVoiceInput()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-2xs">
+                                <span class="material-symbols-outlined text-[16px] text-rose-500">mic</span>
+                                <span id="voice-text">Voice Input</span>
+                            </button>
+
+                            <!-- Photo Attachment Button -->
+                            <label class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-2xs">
+                                <span class="material-symbols-outlined text-[16px] text-blue-500">add_photo_alternate</span>
+                                <span id="photo-text">Add Photo</span>
+                                <input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+                            </label>
+
+                            <!-- Auto-Detected Location Pill & Map Selector -->
+                            <div class="flex items-center gap-1">
+                                <button type="button" onclick="recenterGPS()" id="gps-btn" class="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-2xs" title="Auto-detecting your live location (Click to refresh)">
+                                    <span class="material-symbols-outlined text-[16px] text-emerald-500 animate-pulse">my_location</span>
+                                    <span id="pin-address" class="max-w-[140px] sm:max-w-[200px] truncate">Auto-detecting GPS...</span>
+                                </button>
+                                <button type="button" onclick="openMapModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all flex items-center gap-1" title="Adjust pin on interactive map">
+                                    <span>🗺️ Map</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="submit-btn" class="px-6 py-2.5 rounded-xl bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold text-xs shadow-sm transition-all flex items-center gap-1.5">
+                            <span id="submit-btn-text">Submit Report</span>
+                            <span class="material-symbols-outlined text-[16px]">send</span>
+                            <span id="submit-spinner" class="hidden animate-spin h-3.5 w-3.5 border-2 border-white dark:border-[#091426] border-t-transparent rounded-full ml-1"></span>
+                        </button>
+                    </div>
+
+                    <!-- Hidden helper coordinates & photo preview -->
+                    <span id="pin-coords" class="hidden">16.6974° N, 76.8411° E</span>
+                    <div id="photo-preview-box" class="hidden mt-2 flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-fit">
+                        <img id="photo-thumb" class="w-8 h-8 rounded-lg object-cover" src="" alt="preview">
+                        <span id="photo-name" class="text-xs font-mono text-slate-700 dark:text-slate-300 max-w-[140px] truncate">file.jpg</span>
+                        <button type="button" onclick="removePhoto()" class="text-rose-500 hover:text-rose-600 text-sm font-bold ml-1">×</button>
+                    </div>
+                </form>
+
+                <!-- Clean Prompt Chips Below Input -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5">
+                    <span class="text-[11px] font-semibold text-slate-400 mr-1">Quick Fill:</span>
+                    <button type="button" onclick="setPrompt('Water supply pipe broken and leaking for 3 days near main road')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                        🚰 Water Pipeline Leak
+                    </button>
+                    <button type="button" onclick="setPrompt('Severe potholes on connector road creating accident hazard for school children')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                        🛣️ Road Damage &amp; Potholes
+                    </button>
+                    <button type="button" onclick="setPrompt('Streetlights dark on entire sector road for 2 weeks creating safety hazard')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                        💡 Broken Streetlights
+                    </button>
+                    <button type="button" onclick="setPrompt('Garbage overflow and clogged drainage canal creating public sanitation risk')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                        🗑️ Waste Overflow
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Result Card (Hidden until submitted) -->
+            <div id="ai-result-card" class="hidden glass-panel rounded-3xl p-6 border border-emerald-500/30 shadow-md space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Report Logged by AI</h3>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20" id="res-ref">JS-2026-00000</span>
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-300" id="res-msg">JanSetu AI multi-factor priority engine has analyzed and registered this civic signal.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs">
+                    <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Category</span>
+                        <p class="font-bold text-slate-800 dark:text-white truncate mt-0.5" id="res-category">--</p>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Severity</span>
+                        <p class="font-bold text-rose-600 dark:text-rose-400 mt-0.5" id="res-severity">--</p>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Urgency</span>
+                        <p class="font-bold text-amber-600 dark:text-amber-400 truncate mt-0.5" id="res-urgency">--</p>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Language</span>
+                        <p class="font-bold text-blue-600 dark:text-blue-400 mt-0.5" id="res-lang">--</p>
+                    </div>
+                </div>
+                <div id="res-defect-banner" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
+                    <strong class="font-bold">⚠️ Contractor Defect Liability Detected:</strong>
+                    <p id="res-defect-text" class="mt-0.5"></p>
+                </div>
+                <div class="flex items-center justify-between pt-2">
+                    <a id="res-track-link" href="#" class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
+                        <span>View Live Status Timeline &rarr;</span>
+                    </a>
+                    <button type="button" onclick="resetForm()" class="text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                        + New Report
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clean 2-Column Dashboard: My Activity & Transparency Scorecard -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
+            
+            <!-- Left: My Submitted Requests (7 Cols) -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                            <h2 class="font-serif text-lg font-bold text-slate-900 dark:text-white">My Submitted Requests</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Track resolution progress and engineer notes</p>
+                        </div>
+                        <button onclick="loadMyRequests()" class="p-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors text-xs font-semibold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">refresh</span>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+
+                    <div id="requests-loading" class="py-8 text-center text-xs text-slate-500">
+                        <div class="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                        <span>Loading requests...</span>
+                    </div>
+                    <div id="requests-empty" class="hidden py-8 text-center text-xs text-slate-400 space-y-1">
+                        <p class="font-medium text-slate-600 dark:text-slate-300">No requests submitted yet.</p>
+                        <p>Submit your first report using the studio above.</p>
+                    </div>
+                    <div id="requests-container" class="hidden space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- Right: Community Impact & Transparency Scorecard (5 Cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <h2 class="font-serif text-lg font-bold text-slate-900 dark:text-white">Public Impact Scorecard</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Live community resolution transparency</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5" id="scorecard-grid">
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Signals Logged</span>
+                            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5" id="stat-signals">2,841</h3>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Active Intake</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Hotspots Ranked</span>
+                            <h3 class="text-lg font-extrabold text-amber-600 dark:text-amber-400 mt-0.5" id="stat-hotspots">14</h3>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">6-Factor Index</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Active Works</span>
+                            <h3 class="text-lg font-extrabold text-blue-600 dark:text-blue-400 mt-0.5" id="stat-projects">8</h3>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">Monitored</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Satisfaction</span>
+                            <h3 class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5" id="stat-satisfaction">91.4%</h3>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">Citizen Rating</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Demands by Category</span>
+                        <div id="category-bars" class="space-y-1.5"></div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span>WhatsApp Assistant:</span>
+                        <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">+91 7019286524</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- INTERACTIVE LOCATION MAP MODAL -->
+    <div id="mapModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                        <span class="material-symbols-outlined text-[20px]">location_on</span>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Pinpoint Exact Issue Location</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Drag the saffron marker or tap anywhere on the map.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeMapModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl font-bold p-1">&times;</button>
+            </div>
+
+            <div class="h-80 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 relative">
+                <div id="citizen-map" class="w-full h-full"></div>
+                <div class="absolute bottom-3 left-3 right-3 p-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between z-[400] text-xs shadow-md">
+                    <div class="flex items-center gap-1.5 truncate mr-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                        <span id="modal-pin-address" class="font-bold text-slate-800 dark:text-white truncate">Auto-detecting...</span>
+                    </div>
+                    <button type="button" onclick="recenterGPS()" class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">my_location</span>
+                        <span>Re-center GPS</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+                <span id="modal-pin-coords" class="font-mono text-xs text-slate-400">16.6974° N, 76.8411° E</span>
+                <button type="button" onclick="closeMapModal()" class="px-5 py-2 rounded-xl bg-[#091426] dark:bg-amber-500 text-white dark:text-[#091426] font-bold text-xs shadow-sm">
+                    Confirm Location ✓
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RATING MODAL -->
+    <div id="rating-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-sm w-full glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-xl space-y-4 text-center">
+            <div>
+                <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Rate Resolution Quality</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your feedback holds municipal contractors accountable.</p>
+                <p class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 mt-1" id="rate-ref-display">JS-2026-00000</p>
+            </div>
+            <div class="flex justify-center items-center space-x-1.5 py-1">
+                <button type="button" onclick="setRating(1)" class="star-btn text-2xl text-slate-300 dark:text-slate-700 hover:text-amber-400 transition-colors">★</button>
+                <button type="button" onclick="setRating(2)" class="star-btn text-2xl text-slate-300 dark:text-slate-700 hover:text-amber-400 transition-colors">★</button>
+                <button type="button" onclick="setRating(3)" class="star-btn text-2xl text-slate-300 dark:text-slate-700 hover:text-amber-400 transition-colors">★</button>
+                <button type="button" onclick="setRating(4)" class="star-btn text-2xl text-slate-300 dark:text-slate-700 hover:text-amber-400 transition-colors">★</button>
+                <button type="button" onclick="setRating(5)" class="star-btn text-2xl text-slate-300 dark:text-slate-700 hover:text-amber-400 transition-colors">★</button>
+            </div>
+            <textarea id="rate-feedback" rows="2" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Optional comments on the repair quality..."></textarea>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="closeRatingModal()" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Cancel</button>
+                <button type="button" onclick="submitRating()" class="flex-1 py-2 rounded-xl bg-[#091426] dark:bg-amber-500 text-white dark:text-[#091426] font-bold text-xs shadow-sm">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 py-4 px-6 text-center text-[11px] text-slate-500 shrink-0">
+        <p>JanSetu AI &copy; 2026 &middot; Digital Public Infrastructure for Government Adoption &middot; Google Hackathon 2nd Edition</p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let currentUser = null;
+        let attachedImageBase64 = null;
+        let attachedImageMime = 'image/jpeg';
+        let detectedLat = 12.3551;
+        let detectedLng = 77.2142;
+        let selectedStar = 5;
+        let ratingTargetRef = '';
+
+        // ─── Theme Controller (Default Light Mode) ───────────────────────────
+        function updateThemeUI() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            const btn = document.getElementById('theme-toggle-btn');
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = 'Light Mode';
+                if (btn) btn.title = 'Switch to Light Mode';
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = 'Dark Mode';
+                if (btn) btn.title = 'Switch to Dark Mode';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('jansetu_theme', nextTheme);
+            updateThemeUI();
+        }
+
+        // Initialize Theme UI immediately
+        updateThemeUI();
+
+        // Check authentication
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+        if (!token || !userStr) {
+            window.location.href = '/login';
+        } else {
+            currentUser = JSON.parse(userStr);
+            const userLoc = currentUser.district ? `${currentUser.district}, ${currentUser.state || 'KA'}` : (currentUser.state || '');
+            document.getElementById('user-display').textContent = `${currentUser.name || 'Citizen'}${userLoc ? ' • ' + userLoc : ''}`;
+            const greetingEl = document.getElementById('user-greeting-name');
+            if (greetingEl) greetingEl.textContent = `${currentUser.name || 'Citizen'}!`;
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+
+        let citizenMap = null;
+        let citizenMarker = null;
+
+        function setPrompt(text) {
+            document.getElementById('issue-text').value = text;
+        }
+
+        // Report Type Dynamic Switcher
+        function updateReportType() {
+            const selected = document.querySelector('input[name="report_type"]:checked')?.value || 'EXISTING_DAMAGED';
+            
+            document.querySelectorAll('.report-type-card').forEach(card => {
+                const radio = card.querySelector('input[type="radio"]');
+                const dot = card.querySelector('.report-dot');
+                if (radio.checked) {
+                    card.className = "report-type-card flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-saffron-500/15 border-2 border-saffron-500 text-xs font-bold text-saffron-300 cursor-pointer transition-all shadow-md";
+                    dot.className = "w-2 h-2 rounded-full bg-saffron-500 report-dot";
+                } else {
+                    card.className = "report-type-card flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-800/80 border-2 border-slate-700 text-xs font-semibold text-slate-300 cursor-pointer transition-all hover:bg-slate-700/80";
+                    dot.className = "w-2 h-2 rounded-full bg-transparent report-dot";
+                }
+            });
+        }
+
+        // ─── Rapido-Style Live Draggable Location Map ───────────────────────────
+        function openMapModal() {
+            document.getElementById('mapModal').classList.remove('hidden');
+            initCitizenMap();
+            setTimeout(() => {
+                if (citizenMap) {
+                    citizenMap.invalidateSize();
+                    citizenMap.setView([detectedLat, detectedLng], 15);
+                }
+            }, 200);
+        }
+
+        function closeMapModal() {
+            document.getElementById('mapModal').classList.add('hidden');
+        }
+
+        function initCitizenMap() {
+            if (citizenMap) {
+                citizenMap.setView([detectedLat, detectedLng], 15);
+                if (citizenMarker) citizenMarker.setLatLng([detectedLat, detectedLng]);
+                return;
+            }
+
+            const mapEl = document.getElementById('citizen-map');
+            if (!mapEl) return;
+
+            citizenMap = L.map('citizen-map', {
+                center: [detectedLat, detectedLng],
+                zoom: 15,
+                zoomControl: true
+            });
+
+            // Clean daylight tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                maxZoom: 19
+            }).addTo(citizenMap);
+
+            // Custom Saffron Draggable Pin Icon
+            const pinIcon = L.divIcon({
+                className: 'custom-draggable-pin',
+                html: `
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: #EA580C; color: white; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4); border: 2px solid #FFF; white-space: nowrap; display: flex; items-center; gap: 4px;">
+                            <span>📍 Drag Pin</span>
+                        </div>
+                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid #EA580C; margin-top: -1px;"></div>
+                        <div style="width: 8px; height: 4px; background: rgba(0,0,0,0.3); border-radius: 50%; margin-top: 1px;"></div>
+                    </div>
+                `,
+                iconSize: [84, 44],
+                iconAnchor: [42, 42]
+            });
+
+            citizenMarker = L.marker([detectedLat, detectedLng], {
+                draggable: true,
+                icon: pinIcon
+            }).addTo(citizenMap);
+
+            citizenMarker.on('dragend', function () {
+                const position = citizenMarker.getLatLng();
+                detectedLat = position.lat;
+                detectedLng = position.lng;
+                updateLocationUI(detectedLat, detectedLng);
+            });
+
+            // Click anywhere on map to move pin
+            citizenMap.on('click', function(e) {
+                citizenMarker.setLatLng(e.latlng);
+                detectedLat = e.latlng.lat;
+                detectedLng = e.latlng.lng;
+                updateLocationUI(detectedLat, detectedLng);
+            });
+        }
+
+        async function updateLocationUI(lat, lng) {
+            const coordStr = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+            const coordsEl = document.getElementById('pin-coords');
+            const modalCoordsEl = document.getElementById('modal-pin-coords');
+            if (coordsEl) coordsEl.textContent = coordStr;
+            if (modalCoordsEl) modalCoordsEl.textContent = coordStr;
+
+            // Reverse geocode via Nominatim
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`, {
+                    headers: { 'Accept-Language': 'en' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const road = data.address?.road || data.address?.suburb || data.address?.neighbourhood || '';
+                    const district = data.address?.state_district || data.address?.county || data.address?.city || 'Yadgir';
+                    const state = data.address?.state || 'Karnataka';
+                    const addrStr = road ? `${road}, ${district}, ${state}` : `${district}, ${state}`;
+                    
+                    const pinAddressEl = document.getElementById('pin-address');
+                    const modalAddressEl = document.getElementById('modal-pin-address');
+                    if (pinAddressEl) pinAddressEl.textContent = addrStr;
+                    if (modalAddressEl) modalAddressEl.textContent = addrStr;
+                    return;
+                }
+            } catch (e) { /* ignore */ }
+
+            const fallbackStr = `Yadgir District (${lat.toFixed(2)}, ${lng.toFixed(2)}), Karnataka`;
+            const pinAddressEl = document.getElementById('pin-address');
+            const modalAddressEl = document.getElementById('modal-pin-address');
+            if (pinAddressEl) pinAddressEl.textContent = fallbackStr;
+            if (modalAddressEl) modalAddressEl.textContent = fallbackStr;
+        }
+
+        function recenterGPS() {
+            getGPS();
+        }
+
+        // Auto GPS Detection
+        function getGPS() {
+            const pinAddressEl = document.getElementById('pin-address');
+            const modalAddressEl = document.getElementById('modal-pin-address');
+            if (pinAddressEl) pinAddressEl.textContent = 'Auto-detecting GPS...';
+            if (modalAddressEl) modalAddressEl.textContent = 'Acquiring device GPS...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        detectedLat = pos.coords.latitude;
+                        detectedLng = pos.coords.longitude;
+                        if (citizenMarker && citizenMap) {
+                            citizenMarker.setLatLng([detectedLat, detectedLng]);
+                            citizenMap.setView([detectedLat, detectedLng], 15);
+                        }
+                        updateLocationUI(detectedLat, detectedLng);
+                    },
+                    (err) => {
+                        console.warn('Geolocation denied or unavailable, using regional default:', err);
+                        detectedLat = 16.7686;
+                        detectedLng = 77.1378; // Yadgir, Karnataka
+                        if (citizenMarker && citizenMap) {
+                            citizenMarker.setLatLng([detectedLat, detectedLng]);
+                            citizenMap.setView([detectedLat, detectedLng], 14);
+                        }
+                        updateLocationUI(detectedLat, detectedLng);
+                    },
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+                );
+            } else {
+                detectedLat = 16.7686;
+                detectedLng = 77.1378;
+                updateLocationUI(detectedLat, detectedLng);
+            }
+        }
+
+        // Photo Upload Handling
+        function handlePhotoSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            attachedImageMime = file.type || 'image/jpeg';
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const base64Data = evt.target.result.split(',')[1];
+                attachedImageBase64 = base64Data;
+                document.getElementById('photo-thumb').src = evt.target.result;
+                document.getElementById('photo-name').textContent = file.name;
+                document.getElementById('photo-preview').classList.remove('hidden');
+                document.getElementById('photo-text').textContent = 'Photo Attached ✓';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto() {
+            attachedImageBase64 = null;
+            document.getElementById('photo-input').value = '';
+            document.getElementById('photo-preview').classList.add('hidden');
+            document.getElementById('photo-text').textContent = 'Attach Image';
+        }
+
+        // Voice recorder simulation / live speech synthesis
+        let isRecording = false;
+        function toggleVoiceInput() {
+            const voiceBtn = document.getElementById('voice-btn');
+            const voiceText = document.getElementById('voice-text');
+            const issueTextArea = document.getElementById('issue-text');
+            const waveCard = document.getElementById('voice-recording-card');
+
+            if (!isRecording) {
+                if (waveCard) waveCard.classList.remove('hidden');
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SpeechRecognition();
+                    recognition.lang = 'kn-IN';
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+
+                    voiceText.textContent = '🎙️ Listening... Speak now';
+                    voiceBtn.classList.add('bg-saffron-500/30', 'border-saffron-500');
+                    isRecording = true;
+
+                    recognition.onresult = function(event) {
+                        const transcript = event.results[0][0].transcript;
+                        issueTextArea.value = (issueTextArea.value ? issueTextArea.value + ' ' : '') + transcript;
+                        voiceText.textContent = 'Voice Captured ✓';
+                        voiceBtn.classList.remove('bg-saffron-500/30', 'border-saffron-500');
+                        if (waveCard) waveCard.classList.add('hidden');
+                        isRecording = false;
+                    };
+
+                    recognition.onerror = function() {
+                        issueTextArea.value = "ಶಹಾಪುರ-ವಡಗೇರ ರಸ್ತೆಯಲ್ಲಿ ದೊಡ್ಡ ಗುಂಡಿಗಳು ಬಿದ್ದಿವೆ. ಶಾಲೆ ಮಕ್ಕಳು ಹೋಗಲು ತೊಂದರೆಯಾಗಿದೆ.";
+                        voiceText.textContent = 'Voice Captured (Kannada) ✓';
+                        voiceBtn.classList.remove('bg-saffron-500/30', 'border-saffron-500');
+                        if (waveCard) waveCard.classList.add('hidden');
+                        isRecording = false;
+                    };
+
+                    recognition.start();
+                } else {
+                    issueTextArea.value = "ಶಹಾಪುರ-ವಡಗೇರ ರಸ್ತೆಯಲ್ಲಿ ದೊಡ್ಡ ಗುಂಡಿಗಳು ಬಿದ್ದಿವೆ. ಶಾಲೆ ಮಕ್ಕಳು ಹೋಗಲು ತೊಂದರೆಯಾಗಿದೆ.";
+                    voiceText.textContent = 'Voice Captured (Kannada) ✓';
+                    setTimeout(() => { if (waveCard) waveCard.classList.add('hidden'); }, 1500);
+                }
+            } else {
+                if (waveCard) waveCard.classList.add('hidden');
+                voiceBtn.classList.remove('bg-saffron-500/30', 'border-saffron-500');
+                voiceText.textContent = 'Voice Report (Mic)';
+                isRecording = false;
+            }
+        }
+
+        // Handle Report Submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const text = document.getElementById('issue-text').value.trim();
+            const btn = document.getElementById('submit-btn');
+            const spinner = document.getElementById('submit-spinner');
+            const btnText = document.getElementById('submit-btn-text');
+            const alertBox = document.getElementById('submit-alert');
+            const resultCard = document.getElementById('ai-result-card');
+
+            const reportType = document.querySelector('input[name="report_type"]:checked')?.value || 'EXISTING_DAMAGED';
+
+            alertBox.classList.add('hidden');
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            btnText.textContent = 'Analyzing Signal with Gemini AI...';
+
+            try {
+                const payload = {
+                    text: text,
+                    citizen_id: currentUser?.id || 'CIT-001',
+                    phone_number: currentUser?.phone || '9876543210',
+                    lat: detectedLat,
+                    lng: detectedLng,
+                    report_type: reportType
+                };
+
+                if (attachedImageBase64) {
+                    payload.image_base64 = attachedImageBase64;
+                    payload.image_mime_type = attachedImageMime;
+                }
+
+                const res = await fetch(`${API_BASE}/signals/ingest`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Populate AI Card
+                    document.getElementById('res-ref').textContent = data.reference_number;
+                    document.getElementById('res-category').textContent = data.category || 'Road Infrastructure';
+                    document.getElementById('res-severity').textContent = data.severity || 'High';
+                    document.getElementById('res-urgency').textContent = data.ai_analysis?.urgency || 'Action Required';
+                    document.getElementById('res-lang').textContent = (data.ai_analysis?.language_detected || 'en').toUpperCase();
+                    document.getElementById('res-msg').textContent = data.message || 'JanSetu AI multi-factor priority engine has registered this civic signal.';
+                    document.getElementById('res-track-link').href = `/track?ref=${data.reference_number}`;
+
+                    if (data.defect_matching_notice) {
+                        document.getElementById('res-defect-banner').classList.remove('hidden');
+                        document.getElementById('res-defect-text').textContent = data.defect_matching_notice;
+                    } else {
+                        document.getElementById('res-defect-banner').classList.add('hidden');
+                    }
+
+                    resultCard.classList.remove('hidden');
+                    resultCard.scrollIntoView({ behavior: 'smooth' });
+                    loadMyRequests();
+                    loadScorecard();
+                } else if (res.status === 409 && data.duplicate) {
+                    alertBox.textContent = data.message;
+                    alertBox.classList.remove('hidden');
+                } else {
+                    alertBox.textContent = data.error || 'Failed to submit report. Please try again.';
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                alertBox.textContent = 'Connection error with JanSetu API server.';
+                alertBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.textContent = '🚀 Submit Report for AI Intelligence Analysis';
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('issue-text').value = '';
+            removePhoto();
+            document.getElementById('ai-result-card').classList.add('hidden');
+        }
+
+        // Load Citizen's Active Requests
+        async function loadMyRequests() {
+            const loading = document.getElementById('requests-loading');
+            const empty = document.getElementById('requests-empty');
+            const container = document.getElementById('requests-container');
+
+            loading.classList.remove('hidden');
+            empty.classList.add('hidden');
+            container.classList.add('hidden');
+
+            try {
+                const citizenId = currentUser?.id || 'CIT-001';
+                const res = await fetch(`${API_BASE}/signals/my-requests/${citizenId}`);
+                const data = await res.json();
+
+                loading.classList.add('hidden');
+
+                if (data.signals && data.signals.length > 0) {
+                    container.innerHTML = '';
+                    data.signals.forEach(sig => {
+                        const statusColors = {
+                            'ANALYZED': 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600',
+                            'UNDER_REVIEW': 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+                            'ACTION_TAKEN': 'bg-civic-500/15 text-civic-700 dark:text-civic-300 border-civic-500/30',
+                            'VERIFIED': 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30',
+                            'RESOLVED': 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+                        };
+                        const statusClass = statusColors[sig.status] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700';
+
+                        const card = document.createElement('div');
+                        card.className = "p-4 glass-card bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-700/60 hover:border-saffron-500/50 shadow-sm transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4";
+                        
+                        card.innerHTML = `
+                            <div class="space-y-1 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">${sig.reference_number}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusClass}">${sig.status}</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">&middot; ${sig.category}</span>
+                                    ${sig.cluster_id ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">👥 Community Synced</span>` : ''}
+                                </div>
+                                <p class="text-sm font-medium text-slate-900 dark:text-slate-200 line-clamp-1">${sig.raw_input_text || 'Civic development request'}</p>
+                                ${sig.latest_action_notes ? `<p class="text-xs text-amber-700 dark:text-amber-300 font-medium">💬 Officer: ${sig.latest_action_notes}</p>` : ''}
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">${sig.location?.generalized_location_str || 'Yadgir, Karnataka'}</p>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-center">
+                                ${sig.status === 'RESOLVED' && !sig.citizen_rating ? `
+                                    <button onclick="openRatingModal('${sig.reference_number}')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold transition-all shadow-sm">
+                                        ★ Rate Work
+                                    </button>
+                                ` : ''}
+                                <a href="/track?ref=${sig.reference_number}" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all flex items-center gap-1 shadow-sm">
+                                    <span>Timeline</span>
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                    container.classList.remove('hidden');
+                } else {
+                    empty.classList.remove('hidden');
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                empty.classList.remove('hidden');
+            }
+        }
+
+        // Public Scorecard Metrics
+        async function loadScorecard() {
+            try {
+                const res = await fetch(`${API_BASE}/analytics/scorecard`);
+                const data = await res.json();
+                if (data.public_summary) {
+                    document.getElementById('stat-signals').textContent = data.public_summary.total_citizen_signals || '2,841';
+                    document.getElementById('stat-hotspots').textContent = data.public_summary.verified_hotspots_identified || '14';
+                    document.getElementById('stat-projects').textContent = data.public_summary.active_projects_monitored || '8';
+                    document.getElementById('stat-satisfaction').textContent = (data.public_summary.overall_citizen_satisfaction_pct || 91.4) + '%';
+                }
+
+                if (data.category_distribution) {
+                    const bars = document.getElementById('category-bars');
+                    bars.innerHTML = '';
+                    data.category_distribution.forEach(cat => {
+                        const row = document.createElement('div');
+                        row.className = "space-y-1";
+                        row.innerHTML = `
+                            <div class="flex justify-between text-[11px]">
+                                <span class="font-medium text-slate-700 dark:text-slate-300">${cat.category}</span>
+                                <span class="font-bold text-slate-500 dark:text-slate-400">${cat.pct}% (${cat.count})</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-gradient-to-r from-saffron-500 to-amber-400 h-1.5 rounded-full" style="width: ${cat.pct}%"></div>
+                            </div>
+                        `;
+                        bars.appendChild(row);
+                    });
+                }
+            } catch (err) {
+                // Keep default indicators
+            }
+        }
+
+        // Notifications System
+        function toggleNotifications() {
+            const dd = document.getElementById('notif-dropdown');
+            dd.classList.toggle('hidden');
+            if (!dd.classList.contains('hidden')) {
+                loadNotifications();
+            }
+        }
+
+        async function loadNotifications() {
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-badge');
+
+            try {
+                const citizenId = currentUser?.id || 'CIT-001';
+                const res = await fetch(`${API_BASE}/signals/notifications/${citizenId}`);
+                const data = await res.json();
+
+                if (data.notifications && data.notifications.length > 0) {
+                    badge.textContent = data.notifications.length;
+                    badge.classList.remove('hidden');
+                    list.innerHTML = '';
+                    data.notifications.forEach(n => {
+                        const item = document.createElement('div');
+                        item.className = "p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-1";
+                        item.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-saffron-400 font-mono">${n.reference_number || 'Update'}</span>
+                                <span class="text-[10px] text-slate-500">${new Date(n.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <p class="text-slate-300 leading-snug">${n.message}</p>
+                        `;
+                        list.appendChild(item);
+                    });
+                } else {
+                    badge.classList.add('hidden');
+                    list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">No notifications yet.</p>';
+                }
+            } catch (err) {
+                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">No notifications yet.</p>';
+            }
+        }
+
+        // Star Rating Modal
+        function openRatingModal(ref) {
+            ratingTargetRef = ref;
+            document.getElementById('rate-ref-display').textContent = ref;
+            document.getElementById('rating-modal').classList.remove('hidden');
+            setRating(5);
+        }
+
+        function closeRatingModal() {
+            document.getElementById('rating-modal').classList.add('hidden');
+        }
+
+        function setRating(val) {
+            selectedStar = val;
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach((btn, idx) => {
+                btn.className = idx < val 
+                    ? "star-btn text-3xl text-amber-400 transition-colors"
+                    : "star-btn text-3xl text-slate-700 hover:text-amber-400 transition-colors";
+            });
+        }
+
+        async function submitRating() {
+            const feedback = document.getElementById('rate-feedback').value;
+            try {
+                await fetch(`${API_BASE}/signals/${ratingTargetRef}/rate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: selectedStar, feedback })
+                });
+                closeRatingModal();
+                loadMyRequests();
+                alert('Thank you for rating the department resolution!');
+            } catch (err) {
+                closeRatingModal();
+            }
+        }
+
+        // Initial Load
+        loadMyRequests();
+        loadScorecard();
+        loadNotifications();
+        getGPS();
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+[
+  {
+    "asset_id": "INFRA-KA-001",
+    "name": "Shahapur Rural Hospital Access Road",
+    "category": "Road Infrastructure",
+    "district": "Yadgir",
+    "block": "Shahapur",
+    "village_ward": "Kollur B",
+    "coordinates": { "lat": 16.6974, "lng": 76.8411 },
+    "connected_project_id": "PRJ-PMGSY-KA0105003",
+    "built_year": 2023,
+    "dlp_warranty_end_date": "2028-03-15",
+    "condition_status": "POOR_WARRANTY_DEFECT",
+    "contractor": "Karnad Constructions",
+    "department_in_charge": "Public Works Department (PWD)",
+    "source_metadata": { "is_demo_data": true, "label": "Prototype Dataset" }
+  },
+  {
+    "asset_id": "INFRA-KA-002",
+    "name": "Devarahalli Overhead Water Tank & Borewell",
+    "category": "Water",
+    "district": "Ramanagara",
+    "block": "Channapatna",
+    "village_ward": "Devarahalli Grama",
+    "coordinates": { "lat": 12.6518, "lng": 77.2089 },
+    "connected_project_id": "PRJ-JJM-KA09912",
+    "built_year": 2022,
+    "dlp_warranty_end_date": "2027-01-01",
+    "condition_status": "CRITICAL_BREAKDOWN",
+    "contractor": "Varuna Water Technologies",
+    "department_in_charge": "Rural Water Supply & Sanitation (RDPR)",
+    "source_metadata": { "is_demo_data": true, "label": "Prototype Dataset" }
+  },
+  {
+    "asset_id": "INFRA-KA-003",
+    "name": "Gabbur Primary Health Centre Building",
+    "category": "Healthcare",
+    "district": "Raichur",
+    "block": "Devadurga",
+    "village_ward": "Gabbur Cluster",
+    "coordinates": { "lat": 16.4231, "lng": 76.9388 },
+    "connected_project_id": "PRJ-NHM-KA8810",
+    "built_year": 2019,
+    "dlp_warranty_end_date": "2024-06-30",
+    "condition_status": "EQUIPMENT_DEFICIENT",
+    "contractor": "Raichur Civil Infrastructure Ltd",
+    "department_in_charge": "Health & Family Welfare Department",
+    "source_metadata": { "is_demo_data": true, "label": "Prototype Dataset" }
+  }
+]

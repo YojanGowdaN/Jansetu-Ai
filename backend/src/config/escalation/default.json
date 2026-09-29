@@ -1,0 +1,21 @@
+{
+  "state": "DEFAULT_NATIONAL",
+  "rules": [
+    {
+      "trigger": "UNRESOLVED_DAYS_EXCEEDED",
+      "threshold_days": 15,
+      "severity": "High",
+      "escalate_from": "FIELD_OFFICER",
+      "escalate_to": "DEPARTMENT_OFFICER",
+      "action_required": "Formal review by Nodal Officer"
+    },
+    {
+      "trigger": "UNRESOLVED_DAYS_EXCEEDED",
+      "threshold_days": 45,
+      "severity": "High",
+      "escalate_from": "DEPARTMENT_OFFICER",
+      "escalate_to": "STATE_AUTHORITY",
+      "action_required": "State Nodal Steering Committee escalation"
+    }
+  ]
+}

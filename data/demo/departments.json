@@ -1,0 +1,47 @@
+[
+  {
+    "department_id": "DEP-PWD",
+    "name": "Public Works Department (PWD)",
+    "category": "Road Infrastructure",
+    "nodal_officer": "Er. R. K. Pattanashetti",
+    "contact_email": "pwd-karnataka@gov.in",
+    "contact_phone": "+918022211000",
+    "jurisdiction_state": "Karnataka"
+  },
+  {
+    "department_id": "DEP-RDPR-WATER",
+    "name": "Rural Water Supply & Sanitation Department (RDPR)",
+    "category": "Water",
+    "nodal_officer": "Smt. Sunitha Rao, IAS",
+    "contact_email": "rdpr-water@karnataka.gov.in",
+    "contact_phone": "+918022254321",
+    "jurisdiction_state": "Karnataka"
+  },
+  {
+    "department_id": "DEP-HEALTH",
+    "name": "Department of Health & Family Welfare",
+    "category": "Healthcare",
+    "nodal_officer": "Dr. N. Shivakumar",
+    "contact_email": "dhs-karnataka@gov.in",
+    "contact_phone": "+918022867890",
+    "jurisdiction_state": "Karnataka"
+  },
+  {
+    "department_id": "DEP-EDU",
+    "name": "Department of School Education & Literacy",
+    "category": "Education",
+    "nodal_officer": "Sri B. H. Gururaj",
+    "contact_email": "schooledu@karnataka.gov.in",
+    "contact_phone": "+918022445566",
+    "jurisdiction_state": "Karnataka"
+  },
+  {
+    "department_id": "DEP-URBAN-DRAIN",
+    "name": "Urban Development & Stormwater Drainage Dept",
+    "category": "Drainage",
+    "nodal_officer": "Er. V. Manjunath",
+    "contact_email": "urbandrainage@karnataka.gov.in",
+    "contact_phone": "+918022998877",
+    "jurisdiction_state": "Karnataka"
+  }
+]

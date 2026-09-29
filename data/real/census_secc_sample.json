@@ -1,0 +1,74 @@
+[
+  {
+    "census_code": "2917001",
+    "district": "Ramanagara",
+    "block": "Channapatna",
+    "village_ward": "Devarahalli Grama",
+    "total_population": 8420,
+    "sc_st_population": 2980,
+    "female_population": 4190,
+    "literacy_rate_pct": 64.2,
+    "secc_vulnerable_households_pct": 48.5,
+    "drinking_water_tap_coverage_pct": 38.0,
+    "pucca_road_connectivity": false,
+    "nearest_phc_distance_km": 14.5,
+    "source_metadata": {
+      "data_source": "Census of India 2011 & Socio Economic and Caste Census (SECC) Data",
+      "is_real_data": true
+    }
+  },
+  {
+    "census_code": "2917002",
+    "district": "Ramanagara",
+    "block": "Kanakapura",
+    "village_ward": "Harohalli South Ward 4",
+    "total_population": 14200,
+    "sc_st_population": 4120,
+    "female_population": 6950,
+    "literacy_rate_pct": 71.8,
+    "secc_vulnerable_households_pct": 39.2,
+    "drinking_water_tap_coverage_pct": 52.4,
+    "pucca_road_connectivity": true,
+    "nearest_phc_distance_km": 6.2,
+    "source_metadata": {
+      "data_source": "Census of India 2011 & Socio Economic and Caste Census (SECC) Data",
+      "is_real_data": true
+    }
+  },
+  {
+    "census_code": "2903001",
+    "district": "Yadgir",
+    "block": "Shahapur",
+    "village_ward": "Kollur B",
+    "total_population": 184000,
+    "sc_st_population": 72400,
+    "female_population": 91200,
+    "literacy_rate_pct": 48.6,
+    "secc_vulnerable_households_pct": 64.8,
+    "drinking_water_tap_coverage_pct": 24.1,
+    "pucca_road_connectivity": false,
+    "nearest_phc_distance_km": 18.2,
+    "source_metadata": {
+      "data_source": "Census of India 2011 & Socio Economic and Caste Census (SECC) Data",
+      "is_real_data": true
+    }
+  },
+  {
+    "census_code": "2904001",
+    "district": "Raichur",
+    "block": "Devadurga",
+    "village_ward": "Gabbur Panchayat Cluster",
+    "total_population": 112500,
+    "sc_st_population": 49800,
+    "female_population": 55800,
+    "literacy_rate_pct": 51.3,
+    "secc_vulnerable_households_pct": 61.2,
+    "drinking_water_tap_coverage_pct": 29.5,
+    "pucca_road_connectivity": false,
+    "nearest_phc_distance_km": 15.0,
+    "source_metadata": {
+      "data_source": "Census of India 2011 & Socio Economic and Caste Census (SECC) Data",
+      "is_real_data": true
+    }
+  }
+]

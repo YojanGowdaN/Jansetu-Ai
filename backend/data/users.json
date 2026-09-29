@@ -1,0 +1,106 @@
+{
+  "citizens": [
+    {
+      "id": "CIT-001",
+      "name": "Demo Citizen",
+      "phone": "9876543210",
+      "email": "citizen@demo.com",
+      "password": "citizen123",
+      "district": "Mandya",
+      "city": "Halaguru",
+      "state": "Karnataka",
+      "role": "CITIZEN",
+      "created_at": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "Karthik Raja",
+      "email": "karthik.test.1787750247612@example.com",
+      "phone": "9845012345",
+      "password": "password123",
+      "district": "Madurai",
+      "state": "Tamil Nadu",
+      "id": "CIT-002",
+      "role": "CITIZEN",
+      "created_at": "2026-08-26T13:17:27.716Z"
+    },
+    {
+      "name": "Yojan Gowda N",
+      "email": "yojangowdan21@gmail.com",
+      "phone": "7019286524",
+      "password": "Yojangowda",
+      "district": "Mandya",
+      "state": "Karnataka",
+      "id": "CIT-003",
+      "role": "CITIZEN",
+      "created_at": "2026-08-26T14:26:06.793Z"
+    }
+  ],
+  "authorities": [
+    {
+      "id": "AUTH-001",
+      "name": "Ramesh Kumar",
+      "email": "field@jansetu.gov.in",
+      "password": "field123",
+      "role": "FIELD_OFFICER",
+      "designation": "Assistant Executive Engineer (PWD)",
+      "jurisdiction": {
+        "district": "Mandya",
+        "taluk": "Halaguru (Malavalli)"
+      },
+      "district": "Mandya",
+      "state": "Karnataka"
+    },
+    {
+      "id": "AUTH-002",
+      "name": "Er. R. K. Pattanashetti",
+      "email": "dept@jansetu.gov.in",
+      "password": "dept123",
+      "role": "DEPARTMENT_OFFICER",
+      "designation": "Executive Engineer (PWD Rural Roads)",
+      "jurisdiction": {
+        "district": "Mandya"
+      },
+      "district": "Mandya",
+      "state": "Karnataka"
+    },
+    {
+      "id": "AUTH-003",
+      "name": "Dr. S. K. Narayana",
+      "email": "district@jansetu.gov.in",
+      "password": "district123",
+      "role": "DISTRICT_AUTHORITY",
+      "designation": "Deputy Commissioner & District Magistrate",
+      "jurisdiction": {
+        "district": "Mandya"
+      },
+      "district": "Mandya",
+      "state": "Karnataka"
+    },
+    {
+      "id": "AUTH-004",
+      "name": "Smt. Vandita Sharma, IAS",
+      "email": "state@jansetu.gov.in",
+      "password": "state123",
+      "role": "STATE_AUTHORITY",
+      "designation": "Additional Chief Secretary (RDPR & Infra)",
+      "jurisdiction": {
+        "state": "Karnataka"
+      },
+      "district": "",
+      "state": "Karnataka"
+    },
+    {
+      "id": "AUTH-005",
+      "name": "Shri Rajesh Verma, IAS",
+      "email": "national@jansetu.gov.in",
+      "password": "national123",
+      "role": "NATIONAL_POLICYMAKER",
+      "designation": "Secretary, Ministry of Rural Development (MoRD)",
+      "jurisdiction": {
+        "national": true
+      },
+      "district": "",
+      "state": "National"
+    }
+  ]
+}

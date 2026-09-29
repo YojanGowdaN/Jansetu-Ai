@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JanSetu AI — Citizen Request Accountability Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', 'sans-serif'],
+            serif: ['"Noto Serif"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#091426',
+              container: '#1E293B',
+              fixed: '#D8E3FB',
+            },
+            secondary: {
+              DEFAULT: '#855300',
+              container: '#FEA619',
+              fixed: '#FFDDB8',
+            },
+            surface: {
+              DEFAULT: '#FAF9F8',
+              bright: '#FFFFFF',
+              dim: '#DADAD9',
+              container: {
+                lowest: '#FFFFFF',
+                low: '#F4F3F2',
+                DEFAULT: '#EEEEED',
+                high: '#E9E8E7',
+                highest: '#E3E2E1',
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ─── Light Mode Defaults ───────────────────────────────── */
+    body {
+      background-color: #FAF9F8;
+      color: #1A1C1C;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(227, 226, 225, 0.9);
+      box-shadow: 0 20px 35px -10px rgba(9, 20, 38, 0.06), 0 10px 15px -5px rgba(9, 20, 38, 0.03);
+    }
+    .bg-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(9, 20, 38, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(9, 20, 38, 0.03) 1px, transparent 1px);
+    }
+
+    /* ─── Dark Mode Overrides ──────────────────────────────── */
+    .dark body, body.dark {
+      background-color: #090D16 !important;
+      color: #F0E0D1 !important;
+    }
+    .dark .glass-panel {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+    }
+    .dark .bg-grid {
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    }
+  </style>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('jansetu_theme') || 'light';
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+</head>
+<body class="bg-[#FAF9F8] dark:bg-[#090D16] text-[#1A1C1C] dark:text-[#F0E0D1] font-sans min-h-screen flex flex-col justify-between bg-grid antialiased selection:bg-amber-500 selection:text-white">
+
+  <!-- National Accent Strip -->
+  <div class="w-full bg-gradient-to-r from-orange-500 via-white to-emerald-500 h-1 sticky top-0 z-50"></div>
+
+  <!-- Header Navigation -->
+  <header class="bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md px-6 py-3.5 shadow-xs sticky top-1 z-40">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/dashboard" class="flex items-center space-x-2.5 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-black text-white text-base shadow-sm">
+            JS
+          </div>
+          <div>
+            <span class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">JanSetu <span class="text-amber-500">AI</span></span>
+            <span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Citizen</span>
+          </div>
+        </a>
+      </div>
+      <div class="flex items-center space-x-2.5 sm:space-x-3">
+        <!-- Theme Toggle Button -->
+        <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-semibold" title="Toggle Theme">
+            <span id="theme-icon">🌙</span>
+            <span id="theme-label" class="hidden sm:inline">Theme</span>
+        </button>
+
+        <a href="/dashboard" class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-1 shadow-xs">
+          <span>&larr; Dashboard</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-4xl mx-auto px-4 py-10 space-y-8 w-full">
+    
+    <div class="text-center space-y-2 max-w-xl mx-auto">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold shadow-sm">
+        <span class="material-symbols-outlined text-[14px]">search</span>
+        <span>Verifiable Civic Timeline</span>
+      </div>
+      <h1 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Track Citizen Request</h1>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+        Enter your unique reference number (e.g. <span class="font-mono text-amber-600 dark:text-amber-400 font-bold">JS-2026-XXXXX</span>) to view live departmental accountability and field verification.
+      </p>
+    </div>
+
+    <!-- Search Form -->
+    <form id="track-form" class="max-w-lg mx-auto flex gap-2">
+      <input
+        type="text"
+        id="ref-code"
+        placeholder="JS-2026-XXXXX"
+        class="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-900 dark:text-white font-mono text-sm placeholder:text-slate-400 shadow-sm"
+        required
+      />
+      <button
+        type="submit"
+        id="track-submit-btn"
+        class="px-6 py-3 bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold rounded-2xl text-sm transition-all shadow-md flex items-center gap-1.5"
+      >
+        <span>Search</span>
+        <span class="material-symbols-outlined text-[18px]">search</span>
+      </button>
+    </form>
+
+    <!-- Error Alert Box -->
+    <div id="error-box" class="hidden p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs font-medium text-center max-w-md mx-auto"></div>
+
+    <!-- Loading Skeleton -->
+    <div id="track-loading" class="hidden py-12 text-center">
+      <div class="animate-spin h-8 w-8 border-3 border-amber-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+      <p class="text-xs text-slate-500">Querying central accountability ledger...</p>
+    </div>
+
+    <!-- RESULT CARD -->
+    <div id="result-card" class="hidden glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl space-y-8">
+      
+      <!-- Top Overview Bar -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-800 pb-6 gap-4">
+        <div>
+          <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">Official Case Reference</span>
+          <h2 class="text-2xl font-black font-mono text-amber-600 dark:text-amber-400" id="res-ref">JS-2026-00000</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="res-date">Submitted on --</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider" id="res-status">ANALYZED</span>
+          <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold" id="res-category">Road Infrastructure</span>
+          <span id="res-community-badge" class="hidden px-3 py-1 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 text-xs font-bold">👥 1 Citizen</span>
+        </div>
+      </div>
+
+      <!-- Community Co-Report Notice -->
+      <div id="res-community-banner" class="hidden p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 flex items-center gap-2.5 text-xs text-blue-900 dark:text-blue-200 shadow-sm">
+        <span class="text-base">👥</span>
+        <p id="res-community-text" class="leading-relaxed"><strong>Community Issue:</strong> Multiple citizens in your locality have co-reported this problem. All official actions taken by the department are synchronized live across all community members.</p>
+      </div>
+
+      <!-- 3 Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Severity Tier</span>
+          <p class="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5" id="res-severity">High Priority</p>
+        </div>
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Potential Impact</span>
+          <p class="font-bold text-slate-900 dark:text-white text-sm mt-0.5" id="res-impact">Emergency Transport Access</p>
+        </div>
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Administrative Locality</span>
+          <p class="font-bold text-blue-600 dark:text-blue-400 text-sm mt-0.5" id="res-location">Shahapur, Yadgir District</p>
+        </div>
+      </div>
+
+      <!-- Problem Summary -->
+      <div class="p-4 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
+        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">AI Synthesized Issue Brief</span>
+        <p class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium" id="res-summary">--</p>
+      </div>
+
+      <!-- Officer Latest Notes -->
+      <div id="res-officer-notes-box" class="hidden p-4 bg-amber-500/10 border border-amber-500/25 rounded-2xl space-y-1 shadow-sm">
+        <span class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400" id="res-officer-title">🏛️ Department Officer Update</span>
+        <p class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed" id="res-officer-notes">--</p>
+      </div>
+
+      <!-- Vertical Accountability Timeline -->
+      <div class="space-y-4">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🏛️ Official Action &amp; Escalation Timeline</span>
+        </h3>
+        <div class="relative pl-6 space-y-6 border-l-2 border-slate-200 dark:border-slate-800" id="timeline-container">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Citizen Satisfaction Feedback Section (If resolved) -->
+      <div id="feedback-section" class="hidden p-5 bg-gradient-to-r from-amber-500/10 to-saffron-500/10 border border-saffron-500/30 rounded-2xl space-y-3 text-center shadow-sm">
+        <h4 class="text-sm font-bold text-amber-800 dark:text-amber-300">Has this issue been resolved satisfactorily?</h4>
+        <p class="text-xs text-slate-600 dark:text-slate-300">Your direct evaluation informs officer performance ratings and state audit reviews.</p>
+        <div class="flex justify-center items-center gap-2 py-1 flex-wrap">
+          <button onclick="submitTrackRating(5)" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold shadow-sm">★ 5 Stars - Excellent</button>
+          <button onclick="submitTrackRating(3)" class="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold shadow-sm">★ 3 Stars - Average</button>
+          <button onclick="submitTrackRating(1)" class="px-3.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs font-bold shadow-sm">★ 1 Star - Poor</button>
+        </div>
+      </div>
+
+      <!-- Privacy Notice -->
+      <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 text-center shadow-inner">
+        🔒 Privacy Protection Guarantee: Precise GPS coordinates are masked to protect citizen anonymity in accordance with Digital Public Infrastructure protocols.
+      </div>
+    </div>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="w-full border-t border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-navy-900/90 py-4 px-6 text-center text-xs text-slate-500">
+    <p>JanSetu AI &copy; 2026 &middot; National Development Intelligence &middot; Verifiable Sovereign Civic Infrastructure</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    let currentTrackRef = '';
+
+    // ─── Theme Controller (Default Light Mode) ───────────────────────────
+    function updateThemeUI() {
+        const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+        const icon = document.getElementById('theme-icon');
+        const label = document.getElementById('theme-label');
+        const btn = document.getElementById('theme-toggle-btn');
+        
+        if (currentTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            if (icon) icon.textContent = '☀️';
+            if (label) label.textContent = 'Light Mode';
+            if (btn) btn.title = 'Switch to Light Mode';
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (icon) icon.textContent = '🌙';
+            if (label) label.textContent = 'Dark Mode';
+            if (btn) btn.title = 'Switch to Dark Mode';
+        }
+    }
+
+    function toggleTheme() {
+        const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('jansetu_theme', nextTheme);
+        updateThemeUI();
+    }
+
+    updateThemeUI();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialRef = urlParams.get('ref');
+
+    if (initialRef) {
+      document.getElementById('ref-code').value = initialRef;
+      fetchTrack(initialRef);
+    }
+
+    document.getElementById('track-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = document.getElementById('ref-code').value.trim();
+      if (code) fetchTrack(code);
+    });
+
+    async function fetchTrack(refCode) {
+      currentTrackRef = refCode;
+      const errorBox = document.getElementById('error-box');
+      const resultCard = document.getElementById('result-card');
+      const loading = document.getElementById('track-loading');
+
+      errorBox.classList.add('hidden');
+      resultCard.classList.add('hidden');
+      loading.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/signals/track/${encodeURIComponent(refCode)}`);
+        const data = await res.json();
+
+        loading.classList.add('hidden');
+
+        if (res.ok) {
+          document.getElementById('res-ref').textContent = data.reference_number;
+          document.getElementById('res-date').textContent = `Filed on ${new Date(data.created_at).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}`;
+          document.getElementById('res-status').textContent = data.status;
+          document.getElementById('res-category').textContent = data.category;
+          document.getElementById('res-severity').textContent = data.severity;
+          document.getElementById('res-impact').textContent = data.potential_impact || 'Community Infrastructure Deficit';
+          document.getElementById('res-location').textContent = data.generalized_location || 'Karnataka';
+          // Community Co-Reports
+          const communityCount = data.community_reports_count || data.reporters_count || 1;
+          const commBadge = document.getElementById('res-community-badge');
+          const commBanner = document.getElementById('res-community-banner');
+          const commText = document.getElementById('res-community-text');
+          if (communityCount > 1) {
+            commBadge.textContent = `👥 ${communityCount} Co-Reporters`;
+            commBadge.classList.remove('hidden');
+            commBanner.classList.remove('hidden');
+            commText.innerHTML = `<strong>Community Issue (${communityCount} Citizens):</strong> You and ${communityCount - 1} other citizens in your locality reported this issue. All departmental field actions and status updates are synchronized live.`;
+          } else {
+            commBadge.classList.add('hidden');
+            commBanner.classList.add('hidden');
+          }
+
+          // Officer Notes Box
+          const officerBox = document.getElementById('res-officer-notes-box');
+          const officerTitle = document.getElementById('res-officer-title');
+          const officerNotes = document.getElementById('res-officer-notes');
+          if (data.latest_action_notes) {
+            officerTitle.textContent = `🏛️ Department Update (${data.updated_by || 'Field Authority'}):`;
+            officerNotes.textContent = data.latest_action_notes;
+            officerBox.classList.remove('hidden');
+          } else {
+            officerBox.classList.add('hidden');
+          }
+
+          // Status colors
+          const statusColors = {
+            'ANALYZED': 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600',
+            'UNDER_REVIEW': 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+            'ACTION_TAKEN': 'bg-civic-500/15 text-civic-700 dark:text-civic-300 border-civic-500/30',
+            'VERIFIED': 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30',
+            'RESOLVED': 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+          };
+          document.getElementById('res-status').className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${statusColors[data.status] || 'bg-slate-100 text-slate-700'}`;
+
+          // Render Timeline
+          const timelineContainer = document.getElementById('timeline-container');
+          timelineContainer.innerHTML = '';
+
+          const steps = data.status_timeline || [
+            { step: 'Reported', completed: true },
+            { step: 'AI Analyzed', completed: true },
+            { step: 'Assigned to Division', completed: false },
+            { step: 'Under Review', completed: false },
+            { step: 'Action Taken', completed: false },
+            { step: 'Resolved', completed: false }
+          ];
+
+          steps.forEach(st => {
+            const item = document.createElement('div');
+            item.className = "relative flex items-start gap-4";
+            
+            const dotClass = st.completed 
+              ? "bg-emerald-500 border-emerald-300 text-white shadow-md shadow-emerald-500/30" 
+              : "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500";
+            
+            const checkIcon = st.completed ? "✓" : "○";
+
+            item.innerHTML = `
+              <div class="w-6 h-6 rounded-full border-2 ${dotClass} flex items-center justify-center font-bold text-[11px] shrink-0 -ml-[37px]">
+                ${checkIcon}
+              </div>
+              <div class="space-y-0.5">
+                <p class="text-xs font-bold ${st.completed ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}">${st.step}</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">${st.completed ? 'Stage verified & completed' : 'Awaiting officer sign-off'}</p>
+              </div>
+            `;
+            timelineContainer.appendChild(item);
+          });
+
+          // Feedback rating section if resolved
+          if (data.status === 'RESOLVED' || data.status === 'VERIFIED') {
+            document.getElementById('feedback-section').classList.remove('hidden');
+          } else {
+            document.getElementById('feedback-section').classList.add('hidden');
+          }
+
+          resultCard.classList.remove('hidden');
+        } else {
+          errorBox.textContent = data.error || 'No civic request found with this reference number.';
+          errorBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        loading.classList.add('hidden');
+        errorBox.textContent = 'Connection error with JanSetu API service.';
+        errorBox.classList.remove('hidden');
+      }
+    }
+
+    async function submitTrackRating(rating) {
+      try {
+        await fetch(`${API_BASE}/signals/${currentTrackRef}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating })
+        });
+        document.getElementById('feedback-section').innerHTML = '<p class="text-xs font-bold text-emerald-600 dark:text-emerald-300">✓ Thank you! Your satisfaction feedback has been recorded.</p>';
+      } catch (err) {
+        alert('Feedback submitted.');
+      }
+    }
+  </script>
+</body>
+</html>

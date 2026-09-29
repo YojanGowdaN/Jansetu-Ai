@@ -1,0 +1,39 @@
+/**
+ * JanSetu AI — Core Data Models & Constant Taxonomies
+ */
+
+const USER_ROLES = {
+  FIELD_OFFICER: 'FIELD_OFFICER',
+  DEPARTMENT_OFFICER: 'DEPARTMENT_OFFICER',
+  DISTRICT_AUTHORITY: 'DISTRICT_AUTHORITY',
+  STATE_AUTHORITY: 'STATE_AUTHORITY',
+  NATIONAL_POLICYMAKER: 'NATIONAL_POLICYMAKER',
+};
+
+const CATEGORIES = [
+  'Road Infrastructure',
+  'Water',
+  'Healthcare',
+  'Education',
+  'Drainage',
+  'Streetlights',
+  'Transport',
+  'Other',
+];
+
+const SIGNAL_STATUS = {
+  RECEIVED: 'RECEIVED',
+  ANALYZED: 'ANALYZED',
+  ASSIGNED: 'ASSIGNED',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  ACTION_TAKEN: 'ACTION_TAKEN',
+  VERIFIED: 'VERIFIED',
+  RESOLVED: 'RESOLVED',
+  OPTED_OUT: 'OPTED_OUT',
+};
+
+module.exports = {
+  USER_ROLES,
+  CATEGORIES,
+  SIGNAL_STATUS,
+};

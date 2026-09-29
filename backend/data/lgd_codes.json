@@ -1,0 +1,54 @@
+{
+  "_metadata": {
+    "description": "LGD (Local Government Directory) administrative code mapping for Indian states and key districts",
+    "source": "Local Government Directory, Ministry of Panchayati Raj, Government of India",
+    "note": "This is a reference mapping. Full LGD data should be synced from lgdirectory.gov.in API when available.",
+    "last_updated": "2026-08-23"
+  },
+  "states": {
+    "Andhra Pradesh": { "code": "28", "short": "AP" },
+    "Arunachal Pradesh": { "code": "12", "short": "AR" },
+    "Assam": { "code": "18", "short": "AS" },
+    "Bihar": { "code": "10", "short": "BR" },
+    "Chhattisgarh": { "code": "22", "short": "CG" },
+    "Goa": { "code": "30", "short": "GA" },
+    "Gujarat": { "code": "24", "short": "GJ" },
+    "Haryana": { "code": "06", "short": "HR" },
+    "Himachal Pradesh": { "code": "02", "short": "HP" },
+    "Jharkhand": { "code": "20", "short": "JH" },
+    "Karnataka": { "code": "29", "short": "KA" },
+    "Kerala": { "code": "32", "short": "KL" },
+    "Madhya Pradesh": { "code": "23", "short": "MP" },
+    "Maharashtra": { "code": "27", "short": "MH" },
+    "Manipur": { "code": "14", "short": "MN" },
+    "Meghalaya": { "code": "17", "short": "ML" },
+    "Mizoram": { "code": "15", "short": "MZ" },
+    "Nagaland": { "code": "13", "short": "NL" },
+    "Odisha": { "code": "21", "short": "OD" },
+    "Punjab": { "code": "03", "short": "PB" },
+    "Rajasthan": { "code": "08", "short": "RJ" },
+    "Sikkim": { "code": "11", "short": "SK" },
+    "Tamil Nadu": { "code": "33", "short": "TN" },
+    "Telangana": { "code": "36", "short": "TS" },
+    "Tripura": { "code": "16", "short": "TR" },
+    "Uttar Pradesh": { "code": "09", "short": "UP" },
+    "Uttarakhand": { "code": "05", "short": "UK" },
+    "West Bengal": { "code": "19", "short": "WB" },
+    "Delhi": { "code": "07", "short": "DL" },
+    "Jammu and Kashmir": { "code": "01", "short": "JK" },
+    "Ladakh": { "code": "37", "short": "LA" },
+    "Puducherry": { "code": "34", "short": "PY" },
+    "Chandigarh": { "code": "04", "short": "CH" },
+    "Andaman and Nicobar Islands": { "code": "35", "short": "AN" },
+    "Dadra and Nagar Haveli and Daman and Diu": { "code": "26", "short": "DN" },
+    "Lakshadweep": { "code": "31", "short": "LD" }
+  },
+  "districts": {
+    "Karnataka": {
+      "Yadgir": { "code": "586", "subdistrictCodes": { "Yadgir": "5350", "Shahapur": "5351", "Shorapur": "5352", "Gurmitkal": "5353", "Hunasagi": "5354", "Wadagera": "5355" } },
+      "Raichur": { "code": "583", "subdistrictCodes": { "Raichur": "5303", "Sindhanur": "5304", "Manvi": "5305", "Devadurga": "5306", "Lingasugur": "5307" } },
+      "Ramanagara": { "code": "572", "subdistrictCodes": { "Ramanagara": "5153", "Channapatna": "5154", "Magadi": "5155", "Kanakapura": "5156" } },
+      "Bengaluru Urban": { "code": "562", "subdistrictCodes": { "Bengaluru North": "5101", "Bengaluru South": "5102", "Bengaluru East": "5103", "Anekal": "5104" } }
+    }
+  }
+}

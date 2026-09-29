@@ -1,0 +1,191 @@
+[
+  {
+    "id": "SIG-2026-00101",
+    "reference_number": "JS-2026-00101",
+    "phone_number_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "language": "kn",
+    "raw_input_text": "ನಮ್ಮ ಶಹಾಪೂರ್ ಗ್ರಾಮೀಣ ಆಸ್ಪತ್ರೆ ರಸ್ತೆಯಲ್ಲಿ ಬೃಹತ್ ಗುಂಡಿಗಳು ಬಿದ್ದಿವೆ. ಆಂಬ್ಯುಲೆನ್ಸ್ ಬರಲು 2 ಗಂಟೆ ಬೇಕಾಗುತ್ತದೆ.",
+    "translated_english_text": "Huge potholes have formed on our Shahapur rural hospital road. Ambulances take 2 hours to reach.",
+    "category": "Road Infrastructure",
+    "sub_category": "Severe Potholes / Emergency Access Blocking",
+    "severity": "High",
+    "potential_impact": "Emergency / Healthcare Access",
+    "urgency": "Immediate Action Required",
+    "location": {
+      "lat": 16.6974,
+      "lng": 76.8411,
+      "village_ward": "Kollur B",
+      "taluk_block": "Shahapur",
+      "district": "Yadgir",
+      "state": "Karnataka",
+      "generalized_location_str": "Kollur B, Shahapur, Yadgir"
+    },
+    "evidence": {
+      "has_text": true,
+      "has_image": true,
+      "has_audio": false,
+      "has_location": true,
+      "image_url": "https://storage.googleapis.com/jansetu-demo-assets/signals/road_damage_01.jpg",
+      "confidence_score": 0.94
+    },
+    "consent_confirmed": true,
+    "status": "ANALYZED",
+    "created_at": "2026-08-20T10:15:30Z",
+    "source_metadata": {
+      "channel": "WhatsApp Bot",
+      "is_demo_data": true,
+      "label": "Prototype / Demonstration Dataset (~200 Signals)"
+    }
+  },
+  {
+    "id": "SIG-2026-00102",
+    "reference_number": "JS-2026-00102",
+    "phone_number_hash": "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4",
+    "language": "kn",
+    "raw_input_text": "ದೇವರಹಳ್ಳಿಯಲ್ಲಿ ಕುಡಿಯುವ ನೀರು 10 ದಿನಗಳಿಂದ ಬಂದಿಲ್ಲ. ಕೊಳವೆ ಬಾವಿ ಕೆಟ್ಟು ಹೋಗಿದೆ.",
+    "translated_english_text": "Drinking water supply has stopped for 10 days in Devarahalli. Borewell is broken.",
+    "category": "Water",
+    "sub_category": "Drinking Water Contamination & Supply Disruption",
+    "severity": "High",
+    "potential_impact": "Public Health & Sanitation Crisis",
+    "urgency": "Immediate Action Required",
+    "location": {
+      "lat": 12.6518,
+      "lng": 77.2089,
+      "village_ward": "Devarahalli Grama",
+      "taluk_block": "Channapatna",
+      "district": "Ramanagara",
+      "state": "Karnataka",
+      "generalized_location_str": "Devarahalli Grama, Channapatna, Ramanagara"
+    },
+    "evidence": {
+      "has_text": true,
+      "has_image": true,
+      "has_audio": true,
+      "has_location": true,
+      "image_url": "https://storage.googleapis.com/jansetu-demo-assets/signals/water_borewell_02.jpg",
+      "confidence_score": 0.96
+    },
+    "consent_confirmed": true,
+    "status": "ASSIGNED",
+    "created_at": "2026-08-21T08:30:12Z",
+    "source_metadata": {
+      "channel": "WhatsApp Bot",
+      "is_demo_data": true,
+      "label": "Prototype / Demonstration Dataset (~200 Signals)"
+    }
+  },
+  {
+    "id": "SIG-2026-00103",
+    "reference_number": "JS-2026-00103",
+    "phone_number_hash": "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
+    "language": "en",
+    "raw_input_text": "Primary Health Centre in Devadurga lacks basic maternal care equipment and doctor staff.",
+    "translated_english_text": "Primary Health Centre in Devadurga lacks basic maternal care equipment and doctor staff.",
+    "category": "Healthcare",
+    "sub_category": "PHC Facility & Equipment Deficiency",
+    "severity": "High",
+    "potential_impact": "Maternal & Child Health Access",
+    "urgency": "High Priority",
+    "location": {
+      "lat": 16.4231,
+      "lng": 76.9388,
+      "village_ward": "Gabbur Cluster",
+      "taluk_block": "Devadurga",
+      "district": "Raichur",
+      "state": "Karnataka",
+      "generalized_location_str": "Gabbur Cluster, Devadurga, Raichur"
+    },
+    "evidence": {
+      "has_text": true,
+      "has_image": false,
+      "has_audio": true,
+      "has_location": true,
+      "confidence_score": 0.88
+    },
+    "consent_confirmed": true,
+    "status": "UNDER_REVIEW",
+    "created_at": "2026-08-22T04:12:00Z",
+    "source_metadata": {
+      "channel": "WhatsApp Bot",
+      "is_demo_data": true,
+      "label": "Prototype / Demonstration Dataset (~200 Signals)"
+    }
+  },
+  {
+    "id": "SIG-2026-00104",
+    "reference_number": "JS-2026-00104",
+    "phone_number_hash": "b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef01",
+    "language": "kn",
+    "raw_input_text": "ನಮ್ಮ ಶಾಲೆಯ ಛಾವಣಿ ಸೋರುತ್ತಿದೆ. ಮಕ್ಕಳಿಗೆ ಕುಳಿತುಕೊಳ್ಳಲು ಕೊಠಡಿ ಇಲ್ಲ.",
+    "translated_english_text": "Our government school roof is leaking heavily. Children have no classroom space.",
+    "category": "Education",
+    "sub_category": "School Infrastructure Damage",
+    "severity": "Medium",
+    "potential_impact": "Student Safety & Learning Disruption",
+    "urgency": "Medium Priority",
+    "location": {
+      "lat": 16.6990,
+      "lng": 76.8430,
+      "village_ward": "Kollur B",
+      "taluk_block": "Shahapur",
+      "district": "Yadgir",
+      "state": "Karnataka",
+      "generalized_location_str": "Kollur B, Shahapur, Yadgir"
+    },
+    "evidence": {
+      "has_text": true,
+      "has_image": true,
+      "has_audio": false,
+      "has_location": true,
+      "image_url": "https://storage.googleapis.com/jansetu-demo-assets/signals/school_roof_04.jpg",
+      "confidence_score": 0.91
+    },
+    "consent_confirmed": true,
+    "status": "ACTION_TAKEN",
+    "created_at": "2026-08-19T14:45:00Z",
+    "source_metadata": {
+      "channel": "WhatsApp Bot",
+      "is_demo_data": true,
+      "label": "Prototype / Demonstration Dataset (~200 Signals)"
+    }
+  },
+  {
+    "id": "SIG-2026-00105",
+    "reference_number": "JS-2026-00105",
+    "phone_number_hash": "c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef012",
+    "language": "kn",
+    "raw_input_text": "ಮುಖ್ಯ ರಸ್ತೆಯ ಚರಂಡಿ ಉಕ್ಕಿ ಹರಿಯುತ್ತಿದೆ. ಇಡೀ ವಾರ್ಡ್ ಮಳೆ ನೀರಿನಿಂದ ತುಂಬಿದೆ.",
+    "translated_english_text": "Main road storm drain is overflowing. Entire ward flooded with monsoon runoff.",
+    "category": "Drainage",
+    "sub_category": "Stormwater Drain Overflow & Flooding",
+    "severity": "High",
+    "potential_impact": "Urban Inundation & Disease Outbreak",
+    "urgency": "Immediate Action Required",
+    "location": {
+      "lat": 12.5463,
+      "lng": 77.4182,
+      "village_ward": "Harohalli Ward 4",
+      "taluk_block": "Kanakapura",
+      "district": "Ramanagara",
+      "state": "Karnataka",
+      "generalized_location_str": "Harohalli Ward 4, Kanakapura, Ramanagara"
+    },
+    "evidence": {
+      "has_text": true,
+      "has_image": true,
+      "has_audio": false,
+      "has_location": true,
+      "image_url": "https://storage.googleapis.com/jansetu-demo-assets/signals/drain_overflow_05.jpg",
+      "confidence_score": 0.95
+    },
+    "consent_confirmed": true,
+    "status": "RESOLVED",
+    "created_at": "2026-08-18T09:10:00Z",
+    "source_metadata": {
+      "channel": "WhatsApp Bot",
+      "is_demo_data": true,
+      "label": "Prototype / Demonstration Dataset (~200 Signals)"
+    }
+  }
+]

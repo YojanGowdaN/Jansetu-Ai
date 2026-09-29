@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JanSetu AI — Secure Citizen Access</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        serif: ['"Noto Serif"', 'serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#091426',
+                            container: '#1E293B',
+                            fixed: '#D8E3FB',
+                        },
+                        secondary: {
+                            DEFAULT: '#855300',
+                            container: '#FEA619',
+                            fixed: '#FFDDB8',
+                        },
+                        surface: {
+                            DEFAULT: '#FAF9F8',
+                            bright: '#FFFFFF',
+                            dim: '#DADAD9',
+                            container: {
+                                lowest: '#FFFFFF',
+                                low: '#F4F3F2',
+                                DEFAULT: '#EEEEED',
+                                high: '#E9E8E7',
+                                highest: '#E3E2E1',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ─── Light Mode Defaults ───────────────────────────────── */
+        body {
+            background-color: #FAF9F8;
+            color: #1A1C1C;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(227, 226, 225, 0.9);
+            box-shadow: 0 20px 40px -15px rgba(9, 20, 38, 0.07), 0 10px 20px -10px rgba(9, 20, 38, 0.04);
+        }
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(9, 20, 38, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(9, 20, 38, 0.03) 1px, transparent 1px);
+        }
+
+        /* ─── Dark Mode Overrides ──────────────────────────────── */
+        .dark body, body.dark {
+            background-color: #090D16 !important;
+            color: #F0E0D1 !important;
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+        }
+        .dark .bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+        .dark .text-on-surface { color: #F0E0D1 !important; }
+        .dark .text-on-surface-variant { color: #94A3B8 !important; }
+        .dark .bg-surface-container-low { background-color: #0F172A !important; }
+        .dark .bg-surface { background-color: #0F172A !important; }
+        .dark .bg-surface-container-high { background-color: #1E293B !important; }
+        .dark .border-outline-variant { border-color: rgba(255, 255, 255, 0.12) !important; }
+        .dark .bg-surface-container-lowest { background-color: #0B132B !important; }
+    </style>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('jansetu_theme') || 'light';
+            if (saved === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-surface dark:bg-[#090D16] text-[#1A1C1C] dark:text-[#F0E0D1] font-sans min-h-screen flex flex-col justify-between bg-grid relative overflow-x-hidden antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- Ambient background glows -->
+    <div class="fixed top-[-10%] right-[-5%] w-[40vw] h-[40vw] rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-[120px] pointer-events-none -z-10"></div>
+    <div class="fixed bottom-[-10%] left-[-5%] w-[50vw] h-[50vw] rounded-full bg-blue-600/10 dark:bg-blue-600/15 blur-[140px] pointer-events-none -z-10"></div>
+
+    <!-- National Accent Strip -->
+    <div class="w-full bg-gradient-to-r from-orange-500 via-white to-emerald-500 h-1 sticky top-0 z-50"></div>
+
+    <!-- Header Navigation -->
+    <header class="w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-3.5 shadow-xs">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center space-x-2.5 group">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-black text-white text-base shadow-sm">
+                        JS
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">JanSetu <span class="text-amber-500">AI</span></span>
+                        <span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Citizen</span>
+                    </div>
+                </a>
+            </div>
+            <div class="flex items-center space-x-2.5 sm:space-x-3">
+                <!-- Theme Toggle Button -->
+                <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-semibold" title="Toggle Theme">
+                    <span id="theme-icon">🌙</span>
+                    <span id="theme-label" class="hidden sm:inline">Theme</span>
+                </button>
+
+                <a href="/track" class="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 shadow-xs">
+                    <span class="material-symbols-outlined text-[15px] text-amber-500">search</span>
+                    <span>Track Request</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center p-4 my-8">
+        <div class="max-w-[480px] w-full flex flex-col gap-6">
+            
+            <!-- Header (Stitch Design 0ce2edcccaaf47c8b7f8602261a26bb7) -->
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-16 h-16 rounded-2xl bg-[#091426] dark:bg-amber-500 text-white dark:text-[#091426] flex items-center justify-center shadow-lg shadow-black/10">
+                    <span class="material-symbols-outlined text-[32px]">shield_person</span>
+                </div>
+                <h1 class="font-serif text-3xl font-bold text-slate-900 dark:text-white tracking-tight" id="form-heading">Secure Citizen Access</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-[340px] leading-relaxed" id="form-subheading">
+                    Welcome back. Please verify your identity to access your civic services and report community issues.
+                </p>
+            </div>
+
+            <!-- Sign-In / Register Card -->
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col gap-6">
+                
+                <!-- Subtle top accent line -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#091426] via-amber-500 to-[#091426] opacity-90"></div>
+
+                <!-- Tab Switcher -->
+                <div class="flex border-b border-slate-200 dark:border-slate-800 -mx-6 sm:-mx-8 -mt-6 sm:-mt-8 mb-2">
+                    <button id="tab-login" class="flex-1 py-3.5 text-xs font-bold text-[#091426] dark:text-amber-400 border-b-2 border-[#091426] dark:border-amber-400 bg-slate-50/70 dark:bg-slate-800/40 transition-all" onclick="switchTab('login')">
+                        Sign In
+                    </button>
+                    <button id="tab-register" class="flex-1 py-3.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all" onclick="switchTab('register')">
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- Alert Notification -->
+                <div id="alert-box" class="hidden p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 rounded-xl text-xs font-medium flex items-center gap-2"></div>
+
+                <!-- Sign In Form (Password Mode) -->
+                <form id="login-form" class="flex flex-col gap-4" onsubmit="handleLogin(event)">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Registered Email or Mobile Number</label>
+                        <div class="relative">
+                            <input type="text" id="login-email" required class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all placeholder:text-slate-400 shadow-sm" placeholder="citizen@demo.com or 9876543210">
+                            <span class="material-symbols-outlined text-slate-400 dark:text-slate-500 absolute left-3 top-3.5 text-[18px]">person</span>
+                        </div>
+                    </div>
+
+                    <div id="login-password-wrapper" class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Password</label>
+                        <div class="relative">
+                            <input type="password" id="login-password" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all placeholder:text-slate-400 shadow-sm" placeholder="••••••••">
+                            <span class="material-symbols-outlined text-slate-400 dark:text-slate-500 absolute left-3 top-3.5 text-[18px]">lock</span>
+                        </div>
+                    </div>
+
+                    <!-- Security Verification (CAPTCHA) -->
+                    <div class="flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Security Verification</label>
+                            <button type="button" onclick="refreshCaptcha('login')" class="text-xs text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-semibold">
+                                <span class="material-symbols-outlined text-[15px]">refresh</span>
+                                Refresh
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="flex-1 bg-slate-200 dark:bg-slate-950 rounded-xl flex items-center justify-center h-11 border border-slate-300 dark:border-slate-700">
+                                <canvas id="login-captcha-canvas" width="130" height="38" class="rounded-lg"></canvas>
+                            </div>
+                            <input type="text" id="login-captcha-input" required maxlength="6" class="w-36 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-mono uppercase tracking-widest text-center focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400" placeholder="CAPTCHA">
+                        </div>
+                    </div>
+
+                    <!-- One-Click Demo Credentials Pill -->
+                    <div class="p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                        <div>
+                            <span class="text-slate-500 dark:text-slate-400">Demo Account: </span>
+                            <span class="font-mono text-amber-600 dark:text-amber-400 font-bold">citizen@demo.com</span>
+                        </div>
+                        <button type="button" onclick="fillDemoCredentials()" class="px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 rounded-lg font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition-colors shadow-sm">
+                            Auto Fill
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col gap-2.5 pt-1">
+                        <button type="submit" id="login-btn" class="w-full bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex justify-center items-center text-sm gap-2">
+                            <span id="login-text">Sign In with Password</span>
+                            <span id="login-spinner" class="hidden ml-2 animate-spin h-4 w-4 border-2 border-white dark:border-[#091426] border-t-transparent rounded-full"></span>
+                        </button>
+
+                        <button type="button" onclick="handleWhatsAppLoginRequest()" id="login-otp-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+                            <span>Sign In with WhatsApp OTP</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Register Form with WhatsApp OTP & CAPTCHA (Stitch 0ce2edcccaaf47c8b7f8602261a26bb7) -->
+                <form id="register-form" class="flex flex-col gap-4 hidden" onsubmit="handleRegister(event)">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+                        <input type="text" id="reg-name" required class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 shadow-sm" placeholder="Arjun Kumar">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">State / UT</label>
+                            <select id="reg-state" onchange="handleStateChange()" class="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm">
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">District</label>
+                            <select id="reg-district" class="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">WhatsApp Mobile Number</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-3 text-sm text-slate-500 dark:text-slate-400 font-mono font-bold">+91</span>
+                            <input type="tel" id="reg-phone" required maxlength="10" class="w-full pl-12 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 shadow-sm" placeholder="9876543210">
+                        </div>
+                        <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1 font-medium">
+                            <span class="material-symbols-outlined text-[14px]">chat</span>
+                            We will send a 6-digit WhatsApp OTP to verify identity
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address (Optional)</label>
+                        <input type="email" id="reg-email" class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 shadow-sm" placeholder="arjun@example.com">
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Create Password</label>
+                        <input type="password" id="reg-password" required class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 shadow-sm" placeholder="••••••••">
+                    </div>
+
+                    <!-- Interactive CAPTCHA for Register -->
+                    <div class="flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Security Verification</label>
+                            <button type="button" onclick="refreshCaptcha('register')" class="text-xs text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-semibold">
+                                <span class="material-symbols-outlined text-[15px]">refresh</span>
+                                Refresh
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="flex-1 bg-slate-200 dark:bg-slate-950 rounded-xl flex items-center justify-center h-11 border border-slate-300 dark:border-slate-700">
+                                <canvas id="reg-captcha-canvas" width="130" height="38" class="rounded-lg"></canvas>
+                            </div>
+                            <input type="text" id="reg-captcha-input" required maxlength="6" class="w-36 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-mono uppercase tracking-widest text-center focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400" placeholder="CAPTCHA">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="register-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex justify-center items-center text-sm gap-2">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+                        <span id="reg-text">Sign Up with WhatsApp OTP</span>
+                        <span id="reg-spinner" class="hidden ml-2 animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- WHATSAPP OTP 6-BOX VERIFICATION MODAL (Stitch 0ce2edcccaaf47c8b7f8602261a26bb7) -->
+    <div id="otpModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#0B132B] rounded-3xl p-8 max-w-[420px] w-full shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col items-center gap-5 text-center">
+            
+            <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center shadow-inner">
+                <svg class="w-10 h-10 text-emerald-600 dark:text-emerald-400 fill-current animate-pulse" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+            </div>
+
+            <div>
+                <h3 id="otp-modal-title" class="font-serif text-2xl font-bold text-slate-900 dark:text-white">Verify OTP</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Enter the 6-digit verification code sent to your WhatsApp: <br>
+                    <span id="otp-phone-display" class="font-mono text-amber-600 dark:text-amber-400 font-bold text-sm">+91 9876543210</span>
+                </p>
+            </div>
+            
+            <!-- 6 Individual Digit Inputs (Stitch 0ce2edcccaaf47c8b7f8602261a26bb7) -->
+            <div class="flex gap-2 justify-center py-2" id="otp-boxes-container">
+                <input class="otp-box w-11 h-13 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl text-center font-mono font-extrabold text-xl text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none" maxlength="1" type="text" data-index="0"/>
+                <input class="otp-box w-11 h-13 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl text-center font-mono font-extrabold text-xl text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none" maxlength="1" type="text" data-index="1"/>
+                <input class="otp-box w-11 h-13 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl text-center font-mono font-extrabold text-xl text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none" maxlength="1" type="text" data-index="2"/>
+                <input class="otp-box w-11 h-13 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl text-center font-mono font-extrabold text-xl text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none" maxlength="1" type="text" data-index="3"/>
+                <input class="otp-box w-11 h-13 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl text-center font-mono font-extrabold text-xl text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none" maxlength="1" type="text" data-index="4"/>
+                <input class="otp-box w-11 h-13 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl text-center font-mono font-extrabold text-xl text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none" maxlength="1" type="text" data-index="5"/>
+            </div>
+
+            <!-- Hidden input fallback for form bindings -->
+            <input type="hidden" id="otp-input" value=""/>
+
+            <div id="otp-alert" class="hidden text-xs text-rose-600 dark:text-rose-400 font-medium p-2 bg-rose-500/10 rounded-xl border border-rose-500/20 w-full"></div>
+
+            <div class="flex flex-col items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                <p>Code expires in <span id="otp-timer" class="text-amber-600 dark:text-amber-400 font-bold font-mono">05:00</span></p>
+                <button type="button" id="otp-resend-btn" onclick="resendCurrentOtp()" class="text-[#091426] dark:text-amber-400 font-bold hover:underline disabled:text-slate-400 disabled:no-underline" disabled>Resend Code</button>
+            </div>
+
+            <div class="flex gap-3 w-full pt-1">
+                <button type="button" onclick="closeOtpModal()" class="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-all">Cancel</button>
+                <button type="button" onclick="submitOtpVerification()" id="otp-verify-btn" class="flex-1 py-3.5 rounded-xl bg-[#091426] hover:bg-[#152244] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center">
+                    <span id="otp-btn-text">Verify &amp; Continue</span>
+                    <span id="otp-spinner" class="hidden ml-2 animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 py-4 px-6 text-center text-xs text-slate-500">
+        <p>JanSetu AI &copy; 2026 &middot; National Development Intelligence Platform &middot; In Compliance with Digital Public Infrastructure Standards</p>
+    </footer>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? `http://${window.location.hostname}:5000/api` 
+            : `${window.location.protocol}//${window.location.hostname}:5000/api`;
+
+        // ─── Theme Controller (Default Light Mode) ───────────────────────────
+        function updateThemeUI() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            const btn = document.getElementById('theme-toggle-btn');
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = 'Light Mode';
+                if (btn) btn.title = 'Switch to Light Mode';
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = 'Dark Mode';
+                if (btn) btn.title = 'Switch to Dark Mode';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('jansetu_theme', nextTheme);
+            updateThemeUI();
+        }
+
+        updateThemeUI();
+
+        // Check if already logged in
+        if (localStorage.getItem('token') && localStorage.getItem('user')) {
+            window.location.href = '/dashboard';
+        }
+
+        // ─── Security CAPTCHA Engine ─────────────────────────────────────────
+        let loginCaptchaCode = '';
+        let regCaptchaCode = '';
+
+        function generateRandomCaptcha(len = 5) {
+            const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+            let code = '';
+            for (let i = 0; i < len; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function drawCaptcha(canvasId, text) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dark noisy background
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Noise lines
+            for (let i = 0; i < 6; i++) {
+                ctx.strokeStyle = `rgba(245, 158, 11, ${0.15 + Math.random() * 0.25})`;
+                ctx.lineWidth = 1 + Math.random();
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+
+            // Distorted alphanumeric text
+            ctx.textBaseline = 'middle';
+            const colors = ['#f59e0b', '#38bdf8', '#34d399', '#f43f5e', '#a78bfa', '#fbbf24'];
+            const charWidth = (canvas.width - 20) / text.length;
+
+            for (let i = 0; i < text.length; i++) {
+                ctx.save();
+                const char = text[i];
+                const x = 12 + i * charWidth;
+                const y = canvas.height / 2 + (Math.random() * 6 - 3);
+                const angle = (Math.random() * 30 - 15) * Math.PI / 180;
+                
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.font = `bold ${19 + Math.floor(Math.random() * 4)}px 'Courier New', monospace`;
+                ctx.fillText(char, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function refreshCaptcha(type) {
+            if (type === 'login') {
+                loginCaptchaCode = generateRandomCaptcha(5);
+                drawCaptcha('login-captcha-canvas', loginCaptchaCode);
+                const input = document.getElementById('login-captcha-input');
+                if (input) input.value = '';
+            } else {
+                regCaptchaCode = generateRandomCaptcha(5);
+                drawCaptcha('reg-captcha-canvas', regCaptchaCode);
+                const input = document.getElementById('reg-captcha-input');
+                if (input) input.value = '';
+            }
+        }
+
+        // Initialize CAPTCHAs immediately
+        setTimeout(() => {
+            refreshCaptcha('login');
+            refreshCaptcha('register');
+        }, 100);
+
+        // ─── OTP Context & State ──────────────────────────────────────────────
+        let currentOtpContext = {
+            purpose: 'REGISTER',
+            phone: '',
+            name: '',
+            email: '',
+            password: '',
+            state: '',
+            district: ''
+        };
+        let otpCountdownInterval = null;
+        let otpExpiresIn = 300;
+
+        function fillDemoCredentials() {
+            document.getElementById('login-email').value = 'citizen@demo.com';
+            document.getElementById('login-password').value = 'citizen123';
+            const capInput = document.getElementById('login-captcha-input');
+            if (capInput) capInput.value = loginCaptchaCode;
+        }
+
+        function switchTab(tab) {
+            const loginBtn = document.getElementById('tab-login');
+            const regBtn = document.getElementById('tab-register');
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const alertBox = document.getElementById('alert-box');
+            const heading = document.getElementById('form-heading');
+            const subheading = document.getElementById('form-subheading');
+
+            alertBox.classList.add('hidden');
+
+            if (tab === 'login') {
+                loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-white bg-civic-600 shadow-sm transition-all";
+                regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                heading.textContent = "Welcome to JanSetu AI";
+                subheading.textContent = "Sign in to report issues and track resolution in real-time";
+                refreshCaptcha('login');
+            } else {
+                regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-white bg-civic-600 shadow-sm transition-all";
+                loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                heading.textContent = "Create Citizen Profile";
+                subheading.textContent = "Submit voice, photo & location requests directly to authorities";
+                refreshCaptcha('register');
+            }
+        }
+
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById('alert-box');
+            alertBox.textContent = msg;
+            alertBox.className = isSuccess 
+                ? "mb-4 p-3.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs font-medium flex items-center gap-2"
+                : "mb-4 p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-medium flex items-center gap-2";
+            alertBox.classList.remove('hidden');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const captchaInput = document.getElementById('login-captcha-input').value.trim().toUpperCase();
+
+            if (captchaInput !== loginCaptchaCode) {
+                showAlert('Security Check Failed: Incorrect CAPTCHA code. Please try again.');
+                refreshCaptcha('login');
+                return;
+            }
+
+            const btn = document.getElementById('login-btn');
+            const spinner = document.getElementById('login-spinner');
+            const text = document.getElementById('login-text');
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Verifying Credentials...';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/citizen-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showAlert("Authentication successful. Redirecting...", true);
+                    setTimeout(() => { window.location.href = '/dashboard'; }, 800);
+                } else {
+                    showAlert(data.error || 'Invalid credentials. Please try again.');
+                    refreshCaptcha('login');
+                }
+            } catch (err) {
+                showAlert('Connection error with JanSetu Central API. Please ensure backend is running.');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                text.textContent = 'Sign In with Password';
+            }
+        }
+
+        // WhatsApp OTP Login Handler
+        async function handleWhatsAppLoginRequest() {
+            const emailOrPhone = document.getElementById('login-email').value.trim();
+            const captchaInput = document.getElementById('login-captcha-input').value.trim().toUpperCase();
+
+            if (!emailOrPhone) {
+                showAlert('Please enter your registered 10-digit mobile number in the field above.');
+                document.getElementById('login-email').focus();
+                return;
+            }
+
+            if (captchaInput !== loginCaptchaCode) {
+                showAlert('Security Check Failed: Incorrect CAPTCHA code. Please try again.');
+                refreshCaptcha('login');
+                return;
+            }
+
+            const phoneDigits = emailOrPhone.replace(/[^0-9]/g, '');
+            if (phoneDigits.length < 10) {
+                showAlert('Please enter a valid 10-digit registered mobile number to receive WhatsApp OTP.');
+                return;
+            }
+            const phone10 = phoneDigits.slice(-10);
+
+            currentOtpContext = {
+                purpose: 'LOGIN',
+                phone: phone10
+            };
+
+            const otpBtn = document.getElementById('login-otp-btn');
+            otpBtn.disabled = true;
+            otpBtn.innerHTML = '<span>⏳ Sending...</span>';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone10, purpose: 'LOGIN' })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    openOtpModal(phone10, 'Sign In with WhatsApp OTP');
+                } else {
+                    showAlert(data.error || 'Failed to send WhatsApp OTP. Please ensure WhatsApp bot is active.');
+                }
+            } catch (err) {
+                showAlert('Could not connect to JanSetu API to send WhatsApp OTP.');
+            } finally {
+                otpBtn.disabled = false;
+                otpBtn.innerHTML = '<span>📲 WhatsApp OTP</span>';
+            }
+        }
+
+        const ALL_INDIAN_STATES_DISTRICTS = {
+            "Andhra Pradesh": [
+                "Alluri Sitharama Raju", "Anakapalli", "Ananthapuramu", "Annamayya", "Bapatla", "Chittoor", "Dr. B.R. Ambedkar Konaseema",
+                "East Godavari", "Eluru", "Guntur", "Kakinada", "Krishna", "Kurnool", "Nandyal", "NTR", "Palnadu", "Parvathipuram Manyam",
+                "Prakasam", "Sri Potti Sriramulu Nellore", "Sri Sathya Sai", "Srikakulam", "Tirupati", "Visakhapatnam", "Vizianagaram",
+                "West Godavari", "YSR Kadapa"
+            ],
+            "Arunachal Pradesh": [
+                "Anjaw", "Changlang", "Dibang Valley", "East Kameng", "East Siang", "Kamle", "Kra Daadi", "Kurung Kumey", "Lepa Rada",
+                "Lohit", "Longding", "Lower Dibang Valley", "Lower Siang", "Lower Subansiri", "Namsai", "Pakke Kessang", "Papum Pare",
+                "Shi Yomi", "Siang", "Tawang", "Tirap", "Upper Siang", "Upper Subansiri", "West Kameng", "West Siang", "Itanagar"
+            ],
+            "Assam": [
+                "Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri",
+                "Dibrugarh", "Dima Hasao", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup", "Kamrup Metropolitan",
+                "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar",
+                "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"
+            ],
+            "Bihar": [
+                "Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran",
+                "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura",
+                "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur",
+                "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"
+            ],
+            "Chhattisgarh": [
+                "Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg",
+                "Gariaband", "Gaurela-Pendra-Marwahi", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba",
+                "Koriya", "Mahasamund", "Manendragarh-Chirmiri-Bharatpur", "Mohla-Manpur-Ambagarh Chowki", "Mungeli", "Narayanpur",
+                "Raigarh", "Raipur", "Rajnandgaon", "Sarangarh-Bilaigarh", "Sakti", "Sukma", "Surajpur", "Surguja", "Khairagarh"
+            ],
+            "Goa": [
+                "North Goa", "South Goa"
+            ],
+            "Gujarat": [
+                "Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur",
+                "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch",
+                "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha",
+                "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"
+            ],
+            "Haryana": [
+                "Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal",
+                "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa",
+                "Sonipat", "Yamunanagar"
+            ],
+            "Himachal Pradesh": [
+                "Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur",
+                "Solan", "Una"
+            ],
+            "Jharkhand": [
+                "Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla",
+                "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi",
+                "Sahebganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"
+            ],
+            "Karnataka": [
+                "Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur",
+                "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi",
+                "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi",
+                "Uttara Kannada", "Vijayanagara", "Vijayapura", "Yadgir"
+            ],
+            "Kerala": [
+                "Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram",
+                "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"
+            ],
+            "Madhya Pradesh": [
+                "Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur",
+                "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad",
+                "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur",
+                "Neemuch", "Niwari", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol",
+                "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"
+            ],
+            "Maharashtra": [
+                "Ahmednagar", "Akola", "Amravati", "Aurangabad (Chhatrapati Sambhajinagar)", "Beed", "Bhandara", "Buldhana", "Chandrapur",
+                "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban",
+                "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad (Dharashiv)", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri",
+                "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"
+            ],
+            "Manipur": [
+                "Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi",
+                "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"
+            ],
+            "Meghalaya": [
+                "East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "Eastern West Khasi Hills", "North Garo Hills", "Ri Bhoi",
+                "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"
+            ],
+            "Mizoram": [
+                "Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saitual", "Serchhip", "Siaha"
+            ],
+            "Nagaland": [
+                "Chumoukedima", "Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Niuland", "Noklak", "Peren",
+                "Phek", "Shamator", "Tseminyu", "Tuensang", "Wokha", "Zunheboto"
+            ],
+            "Odisha": [
+                "Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati",
+                "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khurda",
+                "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur",
+                "Subarnapur", "Sundargarh"
+            ],
+            "Punjab": [
+                "Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur",
+                "Jalandhar", "Kapurthala", "Ludhiana", "Malerkotla", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar",
+                "Sahibzada Ajit Singh Nagar (Mohali)", "Sangrur", "Shahid Bhagat Singh Nagar", "Tarn Taran"
+            ],
+            "Rajasthan": [
+                "Ajmer", "Alwar", "Anupgarh", "Balotra", "Banswara", "Baran", "Barmer", "Beawar", "Bharatpur", "Bhilwara", "Bikaner",
+                "Bundi", "Chittorgarh", "Churu", "Dausa", "Deeg", "Didwana-Kuchaman", "Dholpur", "Dudu", "Dungarpur", "Ganganagar",
+                "Gangapur City", "Hanumangarh", "Jaipur", "Jaipur Rural", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur",
+                "Jodhpur Rural", "Karauli", "Kekri", "Khairthal-Tijara", "Kota", "Kotputli-Behror", "Nagaur", "Neem Ka Thana", "Pali",
+                "Phalodi", "Pratapgarh", "Rajsamand", "Salumbar", "Sanchore", "Sawai Madhopur", "Shahpura", "Sikar", "Sirohi",
+                "Tonk", "Udaipur"
+            ],
+            "Sikkim": [
+                "Gangtok", "Gyalshing", "Pakyong", "Namchi", "Mangan", "Soreng"
+            ],
+            "Tamil Nadu": [
+                "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi",
+                "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal",
+                "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur",
+                "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai",
+                "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"
+            ],
+            "Telangana": [
+                "Adilabad", "Bhadradri Kothagudem", "Hanumakonda", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally",
+                "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Kumuram Bheem Asifabad", "Mahabubabad", "Mahbubnagar",
+                "Mancherial", "Medak", "Medchal-Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal",
+                "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad",
+                "Wanaparthy", "Warangal", "Yadadri Bhuvanagiri"
+            ],
+            "Tripura": [
+                "Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"
+            ],
+            "Uttar Pradesh": [
+                "Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Ayodhya", "Azamgarh", "Baghpat", "Bahraich",
+                "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr",
+                "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar (Noida)",
+                "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur",
+                "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur",
+                "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar",
+                "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur",
+                "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"
+            ],
+            "Uttarakhand": [
+                "Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh",
+                "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"
+            ],
+            "West Bengal": [
+                "Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri",
+                "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman",
+                "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
+            ],
+            "Andaman and Nicobar Islands": [
+                "Nicobar", "North and Middle Andaman", "South Andaman"
+            ],
+            "Chandigarh": [
+                "Chandigarh"
+            ],
+            "Dadra and Nagar Haveli and Daman and Diu": [
+                "Dadra and Nagar Haveli", "Daman", "Diu"
+            ],
+            "Delhi": [
+                "Central Delhi", "East Delhi", "New Delhi", "North Delhi", "North East Delhi", "North West Delhi",
+                "Shahdara", "South Delhi", "South East Delhi", "South West Delhi", "West Delhi"
+            ],
+            "Jammu and Kashmir": [
+                "Anantnag", "Bandipora", "Baramulla", "Budgam", "Doda", "Ganderbal", "Jammu", "Kathua", "Kishtwar", "Kulgam",
+                "Kupwara", "Poonch", "Pulwama", "Rajouri", "Ramban", "Reasi", "Samba", "Shopian", "Srinagar", "Udhampur"
+            ],
+            "Ladakh": [
+                "Kargil", "Leh"
+            ],
+            "Lakshadweep": [
+                "Lakshadweep"
+            ],
+            "Puducherry": [
+                "Karaikal", "Mahe", "Puducherry", "Yanam"
+            ]
+        };
+
+        function initStateDistrictDropdowns() {
+            const stateSelect = document.getElementById('reg-state');
+            const districtSelect = document.getElementById('reg-district');
+            if (!stateSelect || !districtSelect) return;
+
+            stateSelect.innerHTML = '';
+            const states = Object.keys(ALL_INDIAN_STATES_DISTRICTS).sort();
+            states.forEach(state => {
+                const opt = document.createElement('option');
+                opt.value = state;
+                opt.textContent = state;
+                if (state === 'Karnataka') opt.selected = true;
+                stateSelect.appendChild(opt);
+            });
+
+            handleStateChange();
+        }
+
+        function handleStateChange() {
+            const stateSelect = document.getElementById('reg-state');
+            const districtSelect = document.getElementById('reg-district');
+            if (!stateSelect || !districtSelect) return;
+
+            const selectedState = stateSelect.value;
+            const districts = ALL_INDIAN_STATES_DISTRICTS[selectedState] || [];
+
+            districtSelect.innerHTML = '';
+            if (districts.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No districts found';
+                districtSelect.appendChild(opt);
+                return;
+            }
+
+            districts.forEach(dist => {
+                const opt = document.createElement('option');
+                opt.value = dist;
+                opt.textContent = dist;
+                districtSelect.appendChild(opt);
+            });
+        }
+
+        // Initialize state-district options
+        initStateDistrictDropdowns();
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const state = document.getElementById('reg-state').value;
+            const district = document.getElementById('reg-district').value;
+            const password = document.getElementById('reg-password').value;
+            const captchaInput = document.getElementById('reg-captcha-input').value.trim().toUpperCase();
+
+            if (captchaInput !== regCaptchaCode) {
+                showAlert('Security Check Failed: Incorrect CAPTCHA code. Please try again.');
+                refreshCaptcha('register');
+                return;
+            }
+
+            const phoneDigits = phone.replace(/[^0-9]/g, '');
+            if (phoneDigits.length < 10) {
+                showAlert('Please enter a valid 10-digit mobile number for WhatsApp verification.');
+                return;
+            }
+            const phone10 = phoneDigits.slice(-10);
+
+            currentOtpContext = {
+                purpose: 'REGISTER',
+                name,
+                email,
+                phone: phone10,
+                state,
+                district,
+                password
+            };
+
+            const btn = document.getElementById('register-btn');
+            const spinner = document.getElementById('reg-spinner');
+            const text = document.getElementById('reg-text');
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Sending WhatsApp OTP...';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone10, email, purpose: 'REGISTER' })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    openOtpModal(phone10, 'Verify WhatsApp & Register');
+                } else {
+                    showAlert(data.error || 'Failed to dispatch WhatsApp OTP. Please try again.');
+                    refreshCaptcha('register');
+                }
+            } catch (err) {
+                showAlert('Connection error with JanSetu API. Please try again.');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                text.textContent = 'Verify WhatsApp & Register';
+            }
+        }
+
+        // ─── OTP Modal Controller & 6-Box Handling (Stitch 0ce2edcccaaf47c8b7f8602261a26bb7) ──
+        function initOtpBoxes() {
+            const boxes = document.querySelectorAll('.otp-box');
+            boxes.forEach((box, idx) => {
+                box.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    if (val.length > 0) {
+                        e.target.value = val.charAt(val.length - 1);
+                        if (idx < boxes.length - 1) {
+                            boxes[idx + 1].focus();
+                        }
+                    }
+                    syncOtpBoxesToHidden();
+                });
+
+                box.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                        boxes[idx - 1].focus();
+                    }
+                });
+
+                box.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                    if (/^\d{6}$/.test(pasteData)) {
+                        pasteData.split('').forEach((digit, i) => {
+                            if (boxes[i]) boxes[i].value = digit;
+                        });
+                        syncOtpBoxesToHidden();
+                        boxes[5].focus();
+                    }
+                });
+            });
+        }
+
+        function syncOtpBoxesToHidden() {
+            const boxes = document.querySelectorAll('.otp-box');
+            let combined = '';
+            boxes.forEach(b => combined += b.value);
+            document.getElementById('otp-input').value = combined;
+        }
+
+        function clearOtpBoxes() {
+            const boxes = document.querySelectorAll('.otp-box');
+            boxes.forEach(b => b.value = '');
+            document.getElementById('otp-input').value = '';
+        }
+
+        initOtpBoxes();
+
+        function openOtpModal(phone10, title) {
+            const titleEl = document.getElementById('otp-modal-title');
+            if (titleEl) titleEl.textContent = title || 'Verify OTP';
+            const phoneEl = document.getElementById('otp-phone-display');
+            if (phoneEl) phoneEl.textContent = `+91 ${phone10}`;
+            clearOtpBoxes();
+            const alertEl = document.getElementById('otp-alert');
+            if (alertEl) alertEl.classList.add('hidden');
+            const modalEl = document.getElementById('otpModal');
+            if (modalEl) modalEl.classList.remove('hidden');
+            
+            const firstBox = document.querySelector('.otp-box[data-index="0"]');
+            if (firstBox) firstBox.focus();
+
+            startOtpCountdown();
+        }
+
+        function closeOtpModal() {
+            document.getElementById('otpModal').classList.add('hidden');
+            if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+        }
+
+        function startOtpCountdown() {
+            if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+            otpExpiresIn = 300; // 5 minutes
+            const timerEl = document.getElementById('otp-timer');
+            const resendBtn = document.getElementById('otp-resend-btn');
+            resendBtn.disabled = true;
+
+            function updateDisplay() {
+                const mins = Math.floor(otpExpiresIn / 60);
+                const secs = otpExpiresIn % 60;
+                timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                if (otpExpiresIn <= 0) {
+                    clearInterval(otpCountdownInterval);
+                    timerEl.textContent = '00:00 (Expired)';
+                    resendBtn.disabled = false;
+                } else if (otpExpiresIn <= 270) {
+                    resendBtn.disabled = false;
+                }
+                otpExpiresIn--;
+            }
+
+            updateDisplay();
+            otpCountdownInterval = setInterval(updateDisplay, 1000);
+        }
+
+        async function resendCurrentOtp() {
+            const resendBtn = document.getElementById('otp-resend-btn');
+            resendBtn.disabled = true;
+            resendBtn.textContent = 'Sending...';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: currentOtpContext.phone,
+                        email: currentOtpContext.email,
+                        purpose: currentOtpContext.purpose
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showOtpAlert('New verification code sent to your WhatsApp!', true);
+                    clearOtpBoxes();
+                    const firstBox = document.querySelector('.otp-box[data-index="0"]');
+                    if (firstBox) firstBox.focus();
+                    startOtpCountdown();
+                } else {
+                    showOtpAlert(data.error || 'Failed to resend OTP.');
+                }
+            } catch (err) {
+                showOtpAlert('Network error resending OTP.');
+            } finally {
+                resendBtn.textContent = 'Resend Code';
+            }
+        }
+
+        function showOtpAlert(msg, isSuccess = false) {
+            const alertEl = document.getElementById('otp-alert');
+            alertEl.textContent = msg;
+            alertEl.className = isSuccess
+                ? "text-xs text-emerald-600 dark:text-emerald-400 font-medium p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 w-full"
+                : "text-xs text-rose-600 dark:text-rose-400 font-medium p-2 bg-rose-500/10 rounded-xl border border-rose-500/20 w-full";
+            alertEl.classList.remove('hidden');
+        }
+
+        async function submitOtpVerification() {
+            syncOtpBoxesToHidden();
+            const otp = document.getElementById('otp-input').value.trim();
+            if (!otp || otp.length < 6) {
+                showOtpAlert('Please enter the complete 6-digit OTP code sent to your WhatsApp.');
+                const firstEmpty = Array.from(document.querySelectorAll('.otp-box')).find(b => !b.value);
+                if (firstEmpty) firstEmpty.focus();
+                return;
+            }
+
+            const btn = document.getElementById('otp-verify-btn');
+            const spinner = document.getElementById('otp-spinner');
+            const text = document.getElementById('otp-btn-text');
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Verifying...';
+
+            try {
+                if (currentOtpContext.purpose === 'LOGIN') {
+                    // WhatsApp OTP Login
+                    const res = await fetch(`${API_BASE}/auth/verify-otp-login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: currentOtpContext.phone, otp })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.token) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        showOtpAlert('OTP Verified! Redirecting...', true);
+                        setTimeout(() => { window.location.href = '/dashboard'; }, 700);
+                    } else {
+                        showOtpAlert(data.error || 'Invalid OTP. Please check your WhatsApp message.');
+                    }
+                } else {
+                    // WhatsApp OTP Registration
+                    const res = await fetch(`${API_BASE}/auth/citizen-register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: currentOtpContext.name,
+                            email: currentOtpContext.email,
+                            phone: currentOtpContext.phone,
+                            state: currentOtpContext.state,
+                            district: currentOtpContext.district,
+                            password: currentOtpContext.password,
+                            otp: otp
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.token) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        showOtpAlert('Account Verified & Created! Redirecting...', true);
+                        setTimeout(() => { window.location.href = '/dashboard'; }, 700);
+                    } else {
+                        showOtpAlert(data.error || 'Registration failed. Please check OTP.');
+                    }
+                }
+            } catch (err) {
+                showOtpAlert('Connection error with JanSetu API. Please try again.');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                text.textContent = 'Verify & Continue';
+            }
+        }
+    </script>
+</body>
+</html>

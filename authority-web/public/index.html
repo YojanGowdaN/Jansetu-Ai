@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JanSetu AI — Government Authority Command Cockpit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        serif: ['"Noto Serif"', 'serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#091426',
+                            container: '#1E293B',
+                            fixed: '#D8E3FB',
+                        },
+                        secondary: {
+                            DEFAULT: '#855300',
+                            container: '#FEA619',
+                            fixed: '#FFDDB8',
+                        },
+                        surface: {
+                            DEFAULT: '#FAF9F8',
+                            bright: '#FFFFFF',
+                            dim: '#DADAD9',
+                            container: {
+                                lowest: '#FFFFFF',
+                                low: '#F4F3F2',
+                                DEFAULT: '#EEEEED',
+                                high: '#E9E8E7',
+                                highest: '#E3E2E1',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body { height: 100%; height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* ─── Light Mode Default Theme ──────────────────────────── */
+        body {
+            background-color: #FAF9F8;
+            color: #1A1C1C;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F4F3F2; }
+        ::-webkit-scrollbar-thumb { background: #DADAD9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FEA619; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(227, 226, 225, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(9, 20, 38, 0.05), 0 8px 10px -6px rgba(9, 20, 38, 0.03);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(227, 226, 225, 0.85);
+            box-shadow: 0 4px 14px rgba(9, 20, 38, 0.04);
+        }
+
+        /* ─── Dark Mode Overrides ──────────────────────────────── */
+        .dark body, body.dark {
+            background-color: #090D16 !important;
+            color: #F0E0D1 !important;
+        }
+        .dark ::-webkit-scrollbar-track { background: #090D16; }
+        .dark ::-webkit-scrollbar-thumb { background: #1E293B; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('jansetu_theme') || 'light';
+            if (saved === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-[#FAF9F8] dark:bg-[#090D16] text-[#1A1C1C] dark:text-[#F0E0D1] h-screen w-screen flex overflow-hidden antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- Mobile sidebar toggle overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/80 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR (Stitch 43a8e57c322f4e96981e9850251fc2cc) -->
+    <aside id="sidebar" class="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 w-64 flex flex-col fixed lg:static h-screen shrink-0 z-50 transition-transform transform -translate-x-full lg:translate-x-0 shadow-sm">
+        
+        <!-- Brand Header -->
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center space-x-3 bg-slate-50 dark:bg-slate-950">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 flex items-center justify-center font-black text-white text-lg shadow-lg">
+                JS
+            </div>
+            <div>
+                <div class="flex items-center space-x-1.5">
+                    <span class="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">JanSetu <span class="text-amber-500">AI</span></span>
+                </div>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">Authority Command</p>
+            </div>
+        </div>
+
+        <!-- User Profile Card -->
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/20 shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">account_circle</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p id="userName" class="text-xs font-bold text-slate-900 dark:text-white truncate">Authorized Officer</p>
+                    <p id="userDesignation" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">District Magistrate</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <span id="userRoleBadge" class="inline-block px-2 py-0.5 bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                    DISTRICT_AUTHORITY
+                </span>
+                <span id="userJurisdiction" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Yadgir District</span>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs (Stitch Human Edition) -->
+        <nav class="flex-1 overflow-y-auto p-2.5 space-y-1 hide-scrollbar">
+            <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-amber-700 dark:text-amber-400 bg-amber-500/15 font-bold transition-all text-xs border border-amber-500/25 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                <span>Executive Overview</span>
+            </button>
+
+            <button onclick="switchTab('signals')" id="tab-signals" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">chat_paste_go</span>
+                <span>Citizen Signals</span>
+            </button>
+
+            <button onclick="switchTab('hotspots')" id="tab-hotspots" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">hub</span>
+                <span>Development Hotspots</span>
+            </button>
+
+            <button onclick="switchTab('national')" id="tab-national" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">account_balance</span>
+                <span>National Priority Rollup</span>
+            </button>
+
+            <button onclick="switchTab('copilot')" id="tab-copilot" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">psychology</span>
+                <span>AI Policy Copilot</span>
+            </button>
+
+            <button onclick="switchTab('map')" id="tab-map" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">map</span>
+                <span>Interactive Map</span>
+            </button>
+
+            <button onclick="switchTab('budget')" id="tab-budget" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">payments</span>
+                <span>Budget Planner</span>
+            </button>
+
+            <button onclick="switchTab('performance')" id="tab-performance" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">trending_up</span>
+                <span>Officer Performance</span>
+            </button>
+
+            <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs">
+                <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+                <span>Officer Allocation &amp; Admin</span>
+            </button>
+        </nav>
+
+        <!-- Sign Out Button -->
+        <div class="p-3 border-t border-slate-200 dark:border-slate-800">
+            <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:text-white hover:bg-rose-600 dark:hover:bg-rose-500/20 font-bold transition-all text-xs border border-rose-500/20 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                <span>Sign Out Session</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col h-screen min-w-0 bg-[#FAF9F8] dark:bg-[#090D16] overflow-hidden relative">
+        
+        <!-- Top Executive Navbar -->
+        <header class="bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shrink-0 backdrop-blur-md shadow-xs">
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleSidebar()" class="lg:hidden p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <span class="material-symbols-outlined text-[20px]">menu</span>
+                </button>
+                <div class="flex items-center space-x-2.5">
+                    <h2 id="headerTitle" class="font-serif text-lg font-bold text-slate-900 dark:text-white tracking-tight">Executive Overview</h2>
+                    <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Command
+                    </span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-3 text-xs">
+                <!-- Google Hackathon Badge Pill -->
+                <span class="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-700 dark:text-blue-300 font-semibold border border-blue-500/20 text-[11px]">
+                    ⚡ Google Gemini 2.5 Active
+                </span>
+
+                <!-- Theme Toggle Button -->
+                <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-semibold" title="Toggle Theme">
+                    <span id="theme-icon">🌙</span>
+                    <span id="theme-label" class="hidden sm:inline">Theme</span>
+                </button>
+
+                <!-- Live IST Clock -->
+                <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="headerTime">00:00:00 IST</span>
+                </div>
+
+                <!-- Quick Export CSV -->
+                <a href="http://localhost:5000/api/analytics/export/signals" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#091426] dark:bg-amber-500 hover:bg-[#152244] dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold transition-colors flex items-center gap-1 shadow-xs">
+                    <span class="material-symbols-outlined text-[15px]">download</span>
+                    <span class="hidden sm:inline">Export</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Body -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-8 min-h-0" id="mainContent">
+            
+            <!-- TAB 1: OVERVIEW -->
+            <div id="content-overview" class="tab-content block space-y-6">
+                <!-- 4 KPI Stat Cards (Stitch Human Edition 43a8e57c322f4e96981e9850251fc2cc) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="overviewStats">
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Citizen Signals</span>
+                        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1" id="kpi-signals">--</h3>
+                        <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">arrow_upward</span> Active Multilingual Intake
+                        </p>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Development Hotspots</span>
+                        <h3 class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1" id="kpi-hotspots">--</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">6-Factor Ranked Priorities</p>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Resolved Cases</span>
+                        <h3 class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1" id="kpi-resolved">--</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Field Verified Solutions</p>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Citizen Satisfaction</span>
+                        <h3 class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1" id="kpi-satisfaction">91.4%</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Public Feedback Rating</p>
+                    </div>
+                </div>
+
+                <!-- Charts & Hotspot Highlights Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Category Breakdown -->
+                    <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 lg:col-span-1 space-y-4">
+                        <h3 class="font-serif text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Demands by Sector</h3>
+                        <div id="overviewCategories" class="space-y-3">
+                            <p class="text-xs text-slate-500">Loading distribution...</p>
+                        </div>
+                    </div>
+
+                    <!-- Top Hotspots Priority Table -->
+                    <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-serif text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Top Priority Development Hotspots</h3>
+                            <button onclick="switchTab('hotspots')" class="text-xs text-amber-600 dark:text-amber-400 hover:underline font-bold">View All &rarr;</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="text-[11px] text-slate-500 dark:text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+                                    <tr>
+                                        <th class="py-2.5 px-3">Hotspot</th>
+                                        <th class="py-2.5 px-3">District</th>
+                                        <th class="py-2.5 px-3">Signals</th>
+                                        <th class="py-2.5 px-3">Priority Score</th>
+                                        <th class="py-2.5 px-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overviewHotspotsTable" class="divide-y divide-slate-200 dark:divide-slate-800">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: CITIZEN SIGNALS -->
+            <div id="content-signals" class="tab-content hidden space-y-6">
+                <!-- Top KPI Counter Cards for Signals -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="p-4 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-xs">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg font-black shrink-0">
+                            📥
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Master Issues</span>
+                            <h4 class="text-xl font-black text-slate-900 dark:text-white" id="sig-kpi-total">--</h4>
+                        </div>
+                    </div>
+                    <div class="p-4 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-xs">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg font-black shrink-0">
+                            👥
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Citizen Co-Reporters</span>
+                            <h4 class="text-xl font-black text-slate-900 dark:text-white" id="sig-kpi-reporters">--</h4>
+                        </div>
+                    </div>
+                    <div class="p-4 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-xs">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg font-black shrink-0">
+                            ⏳
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Under Review</span>
+                            <h4 class="text-xl font-black text-slate-900 dark:text-white" id="sig-kpi-review">--</h4>
+                        </div>
+                    </div>
+                    <div class="p-4 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-xs">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-black shrink-0">
+                            ✅
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Action / Resolved</span>
+                            <h4 class="text-xl font-black text-slate-900 dark:text-white" id="sig-kpi-resolved">--</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Signals Panel -->
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-6">
+                    <!-- Controls Bar -->
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-slate-900 dark:text-white">Citizen Signals Command Stream</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Geospatially deduplicated civic grievances clustered by problem category and locality</p>
+                        </div>
+                        
+                        <!-- Search, Filters, & View Toggle -->
+                        <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+                            <!-- Search -->
+                            <div class="relative flex-1 sm:w-64">
+                                <input type="text" id="signalSearchQuery" oninput="filterSignals()" placeholder="Search problem, locality..." class="w-full pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs">
+                                <span class="absolute left-2.5 top-2.5 text-xs text-slate-400">🔍</span>
+                            </div>
+
+                            <!-- Category Filter -->
+                            <select id="signalFilterCategory" onchange="filterSignals()" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none shadow-xs">
+                                <option value="">All Categories</option>
+                                <option value="Road Infrastructure">Roads &amp; Transport</option>
+                                <option value="Water">Drinking Water</option>
+                                <option value="Healthcare">Public Health</option>
+                                <option value="Education">School Education</option>
+                                <option value="Drainage">Drainage &amp; Sewage</option>
+                                <option value="Streetlights">Streetlights</option>
+                            </select>
+
+                            <!-- Status Filter -->
+                            <select id="signalFilterStatus" onchange="filterSignals()" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none shadow-xs">
+                                <option value="">All Statuses</option>
+                                <option value="ANALYZED">Analyzed</option>
+                                <option value="UNDER_REVIEW">Under Review</option>
+                                <option value="ACTION_TAKEN">Action Taken</option>
+                                <option value="RESOLVED">Resolved</option>
+                            </select>
+
+                            <!-- View Switcher -->
+                            <div class="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
+                                <button onclick="setSignalViewMode('cards')" id="viewModeCardsBtn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs transition-all">🎴 Cards</button>
+                                <button onclick="setSignalViewMode('table')" id="viewModeTableBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all">📋 Table</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 1: BENTO CARDS STREAM (Default) -->
+                    <div id="signalsCardsView" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <!-- VIEW 2: COMPACT TABLE -->
+                    <div id="signalsTableView" class="hidden overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-[11px] text-slate-600 dark:text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+                                <tr>
+                                    <th class="py-3.5 px-4 font-bold">Civic Problem &amp; Category</th>
+                                    <th class="py-3.5 px-3 font-bold">Location</th>
+                                    <th class="py-3.5 px-3 font-bold">Community Reports</th>
+                                    <th class="py-3.5 px-3 font-bold">Severity</th>
+                                    <th class="py-3.5 px-3 font-bold">Evidence</th>
+                                    <th class="py-3.5 px-3 font-bold">Status</th>
+                                    <th class="py-3.5 px-4 font-bold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="signalsTableBody" class="divide-y divide-slate-200 dark:divide-slate-800/60">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: DEVELOPMENT HOTSPOTS -->
+            <div id="content-hotspots" class="tab-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Evidence-Backed Development Hotspots</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Synthesized multi-signal clusters ranked with Explainable 6-Factor Formula</p>
+                    </div>
+                </div>
+                <div id="hotspotsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- TAB 4: NATIONAL PRIORITY ROLLUP -->
+            <div id="content-national" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">National Multi-State Priority Rollup</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Standardized state &amp; district rankings powered by NITI Aayog Deprivation Index</p>
+                        </div>
+                        <a href="http://localhost:5000/api/analytics/export/hotspots" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                            <span class="material-symbols-outlined text-[16px] text-amber-600 dark:text-amber-400">download</span>
+                            <span>Download National CSV</span>
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-[11px] text-slate-600 dark:text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+                                <tr>
+                                    <th class="py-3 px-3">Rank</th>
+                                    <th class="py-3 px-3">State</th>
+                                    <th class="py-3 px-3">District</th>
+                                    <th class="py-3 px-3">Sector</th>
+                                    <th class="py-3 px-3">Composite Score</th>
+                                    <th class="py-3 px-3">Citizen Signals</th>
+                                    <th class="py-3 px-3">Population Impact</th>
+                                    <th class="py-3 px-3">NITI Source</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nationalRollupBody" class="divide-y divide-slate-200 dark:divide-slate-800/60">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: AI POLICY COPILOT -->
+            <div id="content-copilot" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-6 max-w-4xl mx-auto shadow-sm">
+                    <div>
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                                AI
+                            </div>
+                            <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">AI Policy Copilot Studio</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Directly query synthesized ground intelligence, PMGSY warranty audits, and district allocations.</p>
+                    </div>
+
+                    <!-- Prompt Chips -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="askCopilot('Summarize high-priority road infrastructure defects in Yadgir district')" class="text-[11px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition-colors shadow-2xs">
+                            🛣️ Yadgir Road Defects Briefing
+                        </button>
+                        <button onclick="askCopilot('Which water infrastructure projects require immediate budget allocation under Jal Jeevan Mission?')" class="text-[11px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition-colors shadow-2xs">
+                            🚰 Water Allocation Priorities
+                        </button>
+                        <button onclick="askCopilot('List all contractor defect-liability warranty violations requiring show-cause notices')" class="text-[11px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition-colors shadow-2xs">
+                            ⚠️ PMGSY Warranty Violations
+                        </button>
+                    </div>
+
+                    <!-- Copilot Input Area -->
+                    <form onsubmit="handleCopilotSubmit(event)" class="flex gap-2">
+                        <input type="text" id="copilotQuery" placeholder="Ask policy questions in natural language..." required
+                            class="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner">
+                        <button type="submit" id="copilotBtn" class="px-6 py-3 bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold rounded-2xl text-sm transition-all shadow-md flex items-center gap-1.5">
+                            <span id="copilotBtnText">Consult</span>
+                            <span id="copilotSpinner" class="hidden animate-spin h-4 w-4 border-2 border-white dark:border-[#091426] border-t-transparent rounded-full"></span>
+                        </button>
+                    </form>
+
+                    <!-- Response Output Card -->
+                    <div id="copilotOutputCard" class="hidden p-6 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                            <span class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Official Briefing Response</span>
+                            <button onclick="copyCopilotAnswer()" class="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1">
+                                📋 Copy Text
+                            </button>
+                        </div>
+                        <div id="copilotResponseText" class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: INTERACTIVE MAP -->
+            <div id="content-map" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Live Development Hotspots Map</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Spatial visualization of clustered citizen signals and PMGSY road assets</p>
+                        </div>
+                    </div>
+                    <div id="map" class="w-full h-[520px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-hidden shadow-inner"></div>
+                </div>
+            </div>
+
+            <!-- TAB 7: BUDGET PLANNER -->
+            <div id="content-budget" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Evidence-Backed Budget Allocation Planner</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Algorithmically generated central and state scheme allocation recommendations</p>
+                        </div>
+                    </div>
+                    <div id="budgetContainer" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 8: OFFICER PERFORMANCE & ESCALATION -->
+            <div id="content-performance" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 lg:col-span-2 space-y-5 shadow-sm">
+                        <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Officer Accountability Leaderboard</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="text-[11px] text-slate-600 dark:text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+                                    <tr>
+                                        <th class="py-3 px-3">Officer Name</th>
+                                        <th class="py-3 px-3">Role Tier</th>
+                                        <th class="py-3 px-3">Actions Taken</th>
+                                        <th class="py-3 px-3">Cases Resolved</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="officerLeaderboardBody" class="divide-y divide-slate-200 dark:divide-slate-800/60">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Auto-Escalation Controls -->
+                    <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
+                        <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">SLA Auto-Escalation Engine</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Monitors unresolved high-severity complaints. Auto-escalates from Field Officer &rarr; Department Officer (14 days) &rarr; District Magistrate (30 days) &rarr; State Authority (45 days).
+                        </p>
+                        <button onclick="triggerEscalation()" id="escalateBtn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white dark:text-slate-900 font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                            <span>⚡ Run Escalation Audit Now</span>
+                        </button>
+                        <div id="escalationResult" class="hidden p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 9: OFFICER ALLOCATION & ADMIN -->
+            <div id="content-admin" class="tab-content hidden space-y-6">
+                <!-- KPI stats for admin -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Allocated Officers</span>
+                        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1" id="admin-total-officers">--</h3>
+                        <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">&bull; Active Authority Credentials</p>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Ruling Jurisdictions</span>
+                        <h3 class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1" id="admin-jurisdictions">--</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Districts &amp; Subdivisions</p>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Field &amp; Dept Engineers</span>
+                        <h3 class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1" id="admin-field-officers">--</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Tier 1 &amp; 2 Ground Responders</p>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">District &amp; State Heads</span>
+                        <h3 class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1" id="admin-admin-officers">--</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Tier 3, 4 &amp; 5 Authorities</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Government Officer Provisioning &amp; Jurisdiction Ledger</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Provision official credentials and configure ruling jurisdiction boundaries for authority portal access.</p>
+                        </div>
+                        <button onclick="openOfficerModal()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white dark:text-slate-900 font-extrabold text-xs shadow-md transition-all flex items-center gap-2">
+                            <span>➕ Allocate New Officer</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-[11px] text-slate-600 dark:text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+                                <tr>
+                                    <th class="py-3 px-3">Officer ID</th>
+                                    <th class="py-3 px-3">Official Name</th>
+                                    <th class="py-3 px-3">Role Tier</th>
+                                    <th class="py-3 px-3">Designation</th>
+                                    <th class="py-3 px-3">Allocated Region</th>
+                                    <th class="py-3 px-3">Official Email</th>
+                                    <th class="py-3 px-3">Status</th>
+                                    <th class="py-3 px-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officersTableBody" class="divide-y divide-slate-200 dark:divide-slate-800/60">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- STATUS UPDATE MODAL -->
+    <div id="statusModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-md w-full glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white">Update Case Status</h3>
+                <button onclick="closeStatusModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xl">&times;</button>
+            </div>
+            
+            <div class="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                <span class="text-xs font-bold text-slate-800 dark:text-white" id="modalTargetCategoryLocation">Civic Issue — Jurisdiction</span>
+                <span id="modalTargetReportersCount" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20">👥 1 Citizen</span>
+            </div>
+
+            <!-- Broadcast Notice -->
+            <div id="statusModalBroadcastNotice" class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2">
+                <span class="text-sm">📢</span>
+                <p id="statusModalBroadcastText" class="text-[11px] leading-snug">Updating this status will immediately update and notify all citizens who reported this problem via in-app alerts and WhatsApp.</p>
+            </div>
+
+            <form onsubmit="submitStatusUpdate(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">New Status</label>
+                    <select id="modalNewStatus" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white">
+                        <option value="UNDER_REVIEW">Under Review / Inspection</option>
+                        <option value="ACTION_TAKEN">Action Taken by Department</option>
+                        <option value="RESOLVED">Field Verified &amp; Resolved</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Official Notes</label>
+                    <textarea id="modalOfficerNotes" rows="3" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400" placeholder="Describe field inspection or contractor action..."></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeStatusModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold text-xs shadow-md">Save &amp; Broadcast Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SIGNAL DETAIL MODAL -->
+    <div id="signalDetailModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Civic Development Issue</span>
+                    <h3 class="font-serif text-lg font-bold text-slate-900 dark:text-white" id="detailModalCategoryHeading">Civic Problem Overview</h3>
+                </div>
+                <button onclick="closeSignalDetailModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <!-- Status & Badges -->
+            <div class="flex flex-wrap gap-2">
+                <span id="detailModalCategory" class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-bold">Category</span>
+                <span id="detailModalSeverity" class="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25 text-xs font-bold">Severity</span>
+                <span id="detailModalUrgency" class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-bold">Urgency</span>
+                <span id="detailModalStatus" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 text-xs font-bold">Status</span>
+                <span id="detailModalReportType" class="px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 text-xs font-bold">Report Type</span>
+                <span id="detailModalReportsCount" class="px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-xs font-bold">👥 1 Citizen</span>
+            </div>
+
+            <!-- Complaint Text -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Primary Complaint Summary</span>
+                <p id="detailModalText" class="text-sm text-slate-800 dark:text-slate-200 mt-1 leading-relaxed whitespace-pre-line">Loading...</p>
+            </div>
+
+            <!-- Evidence -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Evidence Collected</span>
+                <div id="detailModalEvidence" class="flex flex-wrap gap-2 text-xs"></div>
+            </div>
+
+            <!-- Location + Google Maps -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Location Information</span>
+                <p id="detailModalLocation" class="text-sm text-slate-800 dark:text-slate-200">--</p>
+                <a id="detailModalMapLink" href="#" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#091426] dark:bg-blue-600 hover:bg-[#152244] dark:hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all">
+                    📍 Open Exact Location in Google Maps
+                </a>
+            </div>
+
+            <!-- Community Co-Reporters Section -->
+            <div id="detailModalCommunitySection" class="p-4 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Community Co-Reporters Grouped Under Ticket</span>
+                    <span id="detailModalReportCountBadge" class="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 font-bold text-[10px]">1 Citizen</span>
+                </div>
+                <div id="detailModalCommunityList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Timestamps -->
+            <div class="text-xs text-slate-500 dark:text-slate-400 flex justify-between">
+                <span>Created: <span id="detailModalDate" class="text-slate-700 dark:text-slate-300 font-semibold">--</span></span>
+                <span>Language: <span id="detailModalLang" class="text-slate-700 dark:text-slate-300 font-semibold">--</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6-FACTOR SCORE & NITI MODAL -->
+    <div id="scoreModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Explainable AI Formula</span>
+                    <h3 class="font-serif text-lg font-bold text-slate-900 dark:text-white" id="scoreModalTitle">Development Hotspot</h3>
+                </div>
+                <button onclick="closeScoreModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <!-- Score Badge Header -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Priority Index</span>
+                    <h2 class="text-3xl font-black text-amber-600 dark:text-amber-400" id="scoreModalTotal">0.0 <span class="text-xs font-normal text-slate-400">/ 100</span></h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Evidence Basis</span>
+                    <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400" id="scoreModalSignals">-- Signals</p>
+                </div>
+            </div>
+
+            <!-- 6 Factors Progress Bars -->
+            <div class="space-y-3" id="scoreModalFactors">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- NITI Aayog Transparency Panel -->
+            <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                    <strong class="text-blue-900 dark:text-blue-300 font-bold">🏛️ NITI Aayog Baseline Transparency:</strong>
+                    <span id="scoreModalNitiSource" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30">NITI Aayog (Cached)</span>
+                </div>
+                <p id="scoreModalNitiDesc" class="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFICER ALLOCATION & EDIT MODAL -->
+    <div id="officerModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Government Portal Access</span>
+                    <h3 class="font-serif text-base font-bold text-slate-900 dark:text-white" id="officerModalTitle">Allocate New Officer</h3>
+                </div>
+                <button onclick="closeOfficerModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <form onsubmit="saveOfficer(event)" class="space-y-4">
+                <input type="hidden" id="officerEditId" value="">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name &amp; Title</label>
+                    <input type="text" id="officerName" required placeholder="e.g., Er. Suresh Patil, PWD"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Official Govt Email</label>
+                        <input type="email" id="officerEmail" required placeholder="e.g., suresh.patil@jansetu.gov.in"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Portal Password</label>
+                        <input type="text" id="officerPassword" required placeholder="Initial password"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Administrative Role Tier</label>
+                        <select id="officerRole" required onchange="handleRoleChange()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 shadow-sm">
+                            <option value="FIELD_OFFICER">Tier 1: Field Officer (AEE)</option>
+                            <option value="DEPARTMENT_OFFICER">Tier 2: Department Officer (EE)</option>
+                            <option value="DISTRICT_AUTHORITY">Tier 3: District Magistrate (DC)</option>
+                            <option value="STATE_AUTHORITY">Tier 4: State Authority (Secretary)</option>
+                            <option value="NATIONAL_POLICYMAKER">Tier 5: National Policymaker (Ministry)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Official Designation</label>
+                        <select id="officerDesignationSelect" required onchange="handleDesignationSelect()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 mb-2 shadow-sm"></select>
+                        <input type="text" id="officerDesignationCustom" placeholder="Or enter custom designation" class="hidden w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/50 space-y-3">
+                    <div id="jurisdictionRoleBanner" class="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center justify-between">
+                        <span>Role Jurisdiction</span>
+                        <span id="jurisdictionRoleLabel">District Level</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div id="stateContainer">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Assigned State</label>
+                            <select id="officerStateSelect" onchange="handleStateChange()" class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"></select>
+                        </div>
+                        <div id="districtContainer">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Assigned District</label>
+                            <select id="officerDistrictSelect" onchange="handleDistrictChange()" class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"></select>
+                        </div>
+                        <div id="cityContainer">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">City / Taluk</label>
+                            <select id="officerCitySelect" onchange="handleCityChange()" class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"></select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Custom Jurisdiction Details (Dept/Ward)</label>
+                        <input type="text" id="officerJurisdictionDetails" placeholder="e.g., Ward 45, Rural Water Supply Division"
+                            class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 shadow-sm">
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeOfficerModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">Cancel</button>
+                    <button type="submit" id="saveOfficerBtn" class="flex-1 py-2.5 rounded-xl bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] font-bold text-xs shadow-md">Save &amp; Grant Access</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+const INDIAN_LOCATIONS = {
+    'Karnataka': {
+        'Mandya': ['Halaguru (Malavalli)', 'Mandya', 'Malavalli', 'Maddur', 'Pandavapura', 'Srirangapatna', 'Nagamangala', 'Krishnarajpet (K.R. Pet)'],
+        'Yadgir': ['Shahapur', 'Yadgir', 'Shorapur', 'Gurmitkal', 'Hunsagi', 'Wadgera'],
+        'Raichur': ['Raichur', 'Manvi', 'Sindhanur', 'Devadurga', 'Lingasugur', 'Maski'],
+        'Ramanagara': ['Channapatna', 'Ramanagara', 'Kanakapura', 'Magadi', 'Harohalli'],
+        'Bengaluru Urban': ['Bengaluru North', 'Bengaluru South', 'Bengaluru East', 'Anekal', 'Yelahanka'],
+        'Mysuru': ['Mysuru', 'Nanjangud', 'T. Narasipura', 'Hunsur', 'H.D. Kote', 'K.R. Nagar', 'Periyapatna'],
+        'Hassan': ['Hassan', 'Arsikere', 'Channarayapatna', 'Holenarasipura', 'Sakleshpur', 'Belur', 'Alur', 'Arkalgud'],
+        'Tumakuru': ['Tumakuru', 'Tiptur', 'Kunigal', 'Sira', 'Madhugiri', 'Pavagada', 'Gubbi', 'Turuvekere', 'Chikkanayakanahalli', 'Koratagere'],
+        'Shivamogga': ['Shivamogga', 'Bhadravathi', 'Sagara', 'Shikaripura', 'Soraba', 'Thirthahalli', 'Hosanagara'],
+        'Belagavi': ['Belagavi', 'Gokak', 'Chikkodi', 'Athani', 'Bailhongal', 'Khanapur', 'Ramdurg', 'Saundatti', 'Hukkeri', 'Raibag'],
+        'Kalaburagi': ['Kalaburagi', 'Aland', 'Afzalpur', 'Jevargi', 'Sedam', 'Chittapur', 'Chincholi'],
+        'Dharwad': ['Dharwad', 'Hubballi Urban', 'Hubballi Rural', 'Kundgol', 'Navalgund', 'Kalghatgi'],
+        'Dakshina Kannada': ['Mangaluru', 'Bantwal', 'Puttur', 'Belthangady', 'Sullia', 'Moodabidri', 'Kadaba'],
+        'Udupi': ['Udupi', 'Kundapura', 'Karkala', 'Kaup', 'Brahmavara', 'Byndoor', 'Hebri'],
+        'Ballari': ['Ballari', 'Sanduru', 'Siruguppa', 'Kampli', 'Kurugodu']
+    },
+    'Maharashtra': {
+        'Mumbai': ['Mumbai City', 'Mumbai Suburban', 'Andheri', 'Bandra', 'Kurla', 'Borivali'],
+        'Pune': ['Pune City', 'Haveli', 'Baramati', 'Maval', 'Khed', 'Shirur', 'Junner', 'Daund'],
+        'Nandurbar': ['Nandurbar', 'Navapur', 'Shahada', 'Taloda', 'Akkalkuwa', 'Akrani'],
+        'Osmanabad': ['Osmanabad', 'Tuljapur', 'Omerga', 'Kalamb', 'Bhoom', 'Paranda', 'Washi', 'Lohara'],
+        'Nagpur': ['Nagpur Urban', 'Nagpur Rural', 'Kamptee', 'Hingna', 'Katol', 'Savner', 'Umred']
+    },
+    'Bihar': {
+        'Purnia': ['Purnia East', 'Purnia West', 'Kasba', 'Banmankhi', 'Dhamdaha', 'Amour', 'Baisi'],
+        'Gaya': ['Gaya Town', 'Bodh Gaya', 'Sherghati', 'Tekari', 'Manpur', 'Wazirganj', 'Barachatti'],
+        'Sitamarhi': ['Sitamarhi Sadar', 'Dumra', 'Bairgania', 'Pupri', 'Riga', 'Runnisaidpur', 'Sursand'],
+        'Patna': ['Patna Urban', 'Danapur', 'Phulwari Sharif', 'Barh', 'Masaurhi', 'Paliganj', 'Bikram']
+    },
+    'Rajasthan': {
+        'Jaisalmer': ['Jaisalmer', 'Pokaran', 'Fatehgarh', 'Bhaniyana'],
+        'Dholpur': ['Dholpur', 'Bari', 'Baseri', 'Rajakhera', 'Saipau', 'Sarmathura'],
+        'Jaipur': ['Jaipur City', 'Sanganer', 'Amber', 'Chomu', 'Phulera', 'Kotputli', 'Chaksu']
+    },
+    'Madhya Pradesh': {
+        'Barwani': ['Barwani', 'Sendhwa', 'Pansemal', 'Rajpur', 'Thikri', 'Anjad', 'Pati'],
+        'Khandwa': ['Khandwa', 'Pandhana', 'Punasa', 'Harsud', 'Chhaigaon Makhan', 'Khalwa'],
+        'Bhopal': ['Bhopal Urban', 'Huzur', 'Berasia', 'Kolar']
+    },
+    'Uttar Pradesh': {
+        'Bahraich': ['Bahraich', 'Nanpara', 'Mahasi', 'Kaiserganj', 'Payagpur', 'Mihinpurwa'],
+        'Balrampur': ['Balrampur', 'Tulsipur', 'Utraula', 'Gainsari'],
+        'Lucknow': ['Lucknow Urban', 'Bakshi Ka Talab', 'Malihabad', 'Mohanlalganj', 'Sarojini Nagar']
+    },
+    'Odisha': {
+        'Malkangiri': ['Malkangiri', 'Korukonda', 'Kalimela', 'Podia', 'Mathili', 'Khairput', 'Kudumulugumma'],
+        'Nabarangpur': ['Nabarangpur', 'Umerkote', 'Raighar', 'Jharigam', 'Chandahandi', 'Tentulikhunti']
+    }
+};
+
+const DESIGNATIONS_BY_TIER = {
+    'FIELD_OFFICER': [
+        'Assistant Executive Engineer (PWD)',
+        'Assistant Engineer (Rural Water Supply & Sanitation)',
+        'Junior Engineer (Panchayat Raj Engineering)',
+        'Section Officer (Electricity / Power Distribution)',
+        'Ward Health & Sanitation Inspector (ULB)',
+        'Revenue Inspector (Taluk Office)'
+    ],
+    'DEPARTMENT_OFFICER': [
+        'Executive Engineer (PWD Rural Roads)',
+        'Executive Engineer (Zilla Panchayat Engineering)',
+        'District Officer (Minor Irrigation & Ground Water)',
+        'Chief Officer (Town Municipal Council)',
+        'Assistant Commissioner (Sub-Divisional Magistrate)'
+    ],
+    'DISTRICT_AUTHORITY': [
+        'Deputy Commissioner & District Magistrate (DC / DM)',
+        'Chief Executive Officer (Zilla Panchayat)',
+        'Superintendent of Police (SP)',
+        'Additional Deputy Commissioner (ADC)'
+    ],
+    'STATE_AUTHORITY': [
+        'Additional Chief Secretary (RDPR & Infrastructure)',
+        'Principal Secretary (Public Works Department)',
+        'Managing Director (State Road Development Corp)',
+        'Director (Municipal Administration)'
+    ],
+    'NATIONAL_POLICYMAKER': [
+        'Secretary, Ministry of Rural Development (MoRD)',
+        'Joint Secretary (PMGSY / National Rural Infrastructure)',
+        'Mission Director (Jal Jeevan Mission)',
+        'Adviser (NITI Aayog Infrastructure Vertical)'
+    ]
+};
+        let currentAuthUser = null;
+        let allSignalsData = [];
+        let allIssuesData = [];
+        let leafletMap = null;
+        let mapMarkers = [];
+
+        // ─── Theme Controller (Default Light Mode) ───────────────────────────
+        function updateThemeUI() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            const btn = document.getElementById('theme-toggle-btn');
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = 'Light Mode';
+                if (btn) btn.title = 'Switch to Light Mode';
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = 'Dark Mode';
+                if (btn) btn.title = 'Switch to Dark Mode';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('jansetu_theme') || 'light';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('jansetu_theme', nextTheme);
+            updateThemeUI();
+            const activeTab = document.querySelector('.tab-content:not(.hidden)')?.id?.replace('content-', '') || 'overview';
+            switchTab(activeTab);
+        }
+
+        updateThemeUI();
+
+        // Check login
+        const authToken = localStorage.getItem('auth_token');
+        const authUserStr = localStorage.getItem('auth_user');
+        if (!authToken || !authUserStr) {
+            window.location.href = '/login';
+        } else {
+            currentAuthUser = JSON.parse(authUserStr);
+            document.getElementById('userName').textContent = currentAuthUser.name || 'Authorized Officer';
+            document.getElementById('userDesignation').textContent = currentAuthUser.designation || 'District Magistrate';
+            document.getElementById('userRoleBadge').textContent = currentAuthUser.role || 'DISTRICT_AUTHORITY';
+            
+            const locStr = currentAuthUser.district ? `${currentAuthUser.district}, ${currentAuthUser.state || 'Karnataka'}` : (currentAuthUser.state || 'National');
+            document.getElementById('userJurisdiction').textContent = locStr;
+        }
+
+        // ─── Role-Based Tab Visibility ────────────────────────────────────────
+        const ROLE_TIERS = {
+            'FIELD_OFFICER': 1,
+            'DEPARTMENT_OFFICER': 2,
+            'DISTRICT_AUTHORITY': 3,
+            'STATE_AUTHORITY': 4,
+            'NATIONAL_POLICYMAKER': 5
+        };
+        const userTier = ROLE_TIERS[currentAuthUser?.role] || 1;
+
+        // Hide tabs based on role tier
+        const tabVisibility = {
+            'national': userTier >= 4,     // Only State & National
+            'budget': userTier >= 3,       // District+
+            'performance': userTier >= 3,  // District+
+            'admin': userTier >= 3,        // District+ can allocate & manage officers
+        };
+
+        Object.entries(tabVisibility).forEach(([tabId, visible]) => {
+            if (!visible) {
+                const tabBtn = document.getElementById(`tab-${tabId}`);
+                const tabContent = document.getElementById(`content-${tabId}`);
+                if (tabBtn) tabBtn.style.display = 'none';
+                if (tabContent) tabContent.classList.add('hidden');
+            }
+        });
+
+        // ─── Jurisdiction Filter Builder ──────────────────────────────────────
+        function getJurisdictionQuery() {
+            if (!currentAuthUser) return '';
+            const role = currentAuthUser.role;
+            if (role === 'NATIONAL_POLICYMAKER') return ''; // sees everything
+            if (role === 'STATE_AUTHORITY') return `?state=${encodeURIComponent(currentAuthUser.state || 'Karnataka')}`;
+            // DISTRICT_AUTHORITY, DEPARTMENT_OFFICER, FIELD_OFFICER → filter by district
+            const district = currentAuthUser.district || currentAuthUser.jurisdiction?.district || '';
+            if (district) return `?district=${encodeURIComponent(district)}`;
+            return '';
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sb.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Live Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('headerTime').textContent = now.toLocaleTimeString('en-IN') + ' IST';
+        }, 1000);
+
+        // Tab Navigation
+        function switchTab(tabId) {
+            if (tabVisibility[tabId] === false) {
+                tabId = 'overview';
+            }
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.className = "tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all text-xs";
+            });
+
+            const content = document.getElementById(`content-${tabId}`);
+            const btn = document.getElementById(`tab-${tabId}`);
+            if (content) content.classList.remove('hidden');
+            if (btn) btn.className = "tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-amber-700 dark:text-amber-400 bg-amber-500/15 font-bold transition-all text-xs border border-amber-500/25 shadow-sm";
+
+            const titles = {
+                overview: 'Executive Overview',
+                signals: 'Citizen Signals Ledger',
+                hotspots: 'Development Hotspots',
+                national: 'National Multi-State Priority Rollup',
+                copilot: 'AI Policy Copilot Studio',
+                map: 'Interactive Map',
+                budget: 'Budget Allocation Planner',
+                performance: 'Officer Performance & Escalation',
+                admin: 'Officer Allocation & Access Control'
+            };
+            document.getElementById('headerTitle').textContent = titles[tabId] || 'Command Center';
+
+            if (tabId === 'map') {
+                setTimeout(initMap, 200);
+            }
+            if (tabId === 'admin') {
+                loadOfficers();
+            }
+        }
+
+        // ─── Data Loaders ───────────────────────────────────────────────────
+        async function loadOverview() {
+            try {
+                const [scoreRes, signalsRes, issuesRes] = await Promise.all([
+                    fetch(`${API_BASE}/analytics/scorecard${getJurisdictionQuery()}`),
+                    fetch(`${API_BASE}/signals${getJurisdictionQuery()}`),
+                    fetch(`${API_BASE}/issues${getJurisdictionQuery()}`)
+                ]);
+                const scoreData = await scoreRes.json();
+                const signalsData = await signalsRes.json();
+                const issuesData = await issuesRes.json();
+
+                allSignalsData = signalsData.signals || [];
+                allIssuesData = issuesData.issues || [];
+
+                // KPIs
+                if (scoreData.public_summary) {
+                    document.getElementById('kpi-signals').textContent = scoreData.public_summary.total_citizen_signals;
+                    document.getElementById('kpi-hotspots').textContent = scoreData.public_summary.verified_hotspots_identified;
+                    document.getElementById('kpi-resolved').textContent = scoreData.public_summary.issues_resolved;
+                    document.getElementById('kpi-satisfaction').textContent = (scoreData.public_summary.overall_citizen_satisfaction_pct || 91.4) + '%';
+                }
+
+                // Categories
+                const catContainer = document.getElementById('overviewCategories');
+                catContainer.innerHTML = '';
+                (scoreData.category_distribution || []).forEach(cat => {
+                    const row = document.createElement('div');
+                    row.className = "space-y-1";
+                    row.innerHTML = `
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-700 dark:text-slate-300">${cat.category}</span>
+                            <span class="text-amber-600 dark:text-amber-400 font-bold">${cat.pct}% (${cat.count})</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-1.5 rounded-full" style="width: ${cat.pct}%"></div>
+                        </div>
+                    `;
+                    catContainer.appendChild(row);
+                });
+
+                // Top Hotspots
+                const table = document.getElementById('overviewHotspotsTable');
+                table.innerHTML = '';
+                allIssuesData.slice(0, 5).forEach(h => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors border-b border-slate-100 dark:border-slate-800/60";
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 font-bold text-slate-900 dark:text-white">${h.title}</td>
+                        <td class="py-3 px-3 text-slate-600 dark:text-slate-400">${h.district}</td>
+                        <td class="py-3 px-3 font-bold text-blue-600 dark:text-blue-400">${h.signal_count}</td>
+                        <td class="py-3 px-3 font-black text-amber-600 dark:text-amber-400 font-mono">${(h.priority_score || 0).toFixed(1)}</td>
+                        <td class="py-3 px-3 text-right">
+                            <button onclick="openScoreModal('${h.issue_id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 text-[11px] font-bold">Inspect</button>
+                        </td>
+                    `;
+                    table.appendChild(tr);
+                });
+
+                renderSignals();
+                renderHotspotsGrid();
+                loadNationalRollup();
+                loadBudgetPlanner();
+                loadPerformance();
+            } catch (e) {
+                console.error("Failed to load overview data:", e);
+            }
+        }
+
+        // ─── Signals View Mode & Redesigned Stream ───────────────────────────
+        let currentSignalViewMode = 'cards';
+
+        function setSignalViewMode(mode) {
+            currentSignalViewMode = mode;
+            const cardsContainer = document.getElementById('signalsCardsView');
+            const tableContainer = document.getElementById('signalsTableView');
+            const cardsBtn = document.getElementById('viewModeCardsBtn');
+            const tableBtn = document.getElementById('viewModeTableBtn');
+
+            if (mode === 'cards') {
+                cardsContainer.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                cardsBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs transition-all";
+                tableBtn.className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all";
+            } else {
+                cardsContainer.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+                tableBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs transition-all";
+                cardsBtn.className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all";
+            }
+        }
+
+        function updateSignalKPIs(dataset) {
+            const total = dataset.length;
+            let reporters = 0;
+            let reviewCount = 0;
+            let resolvedCount = 0;
+
+            dataset.forEach(s => {
+                reporters += (s.reporters_count || (s.community_reports ? s.community_reports.length : 1));
+                if (s.status === 'UNDER_REVIEW') reviewCount++;
+                if (['ACTION_TAKEN', 'RESOLVED'].includes(s.status)) resolvedCount++;
+            });
+
+            const kpiTotal = document.getElementById('sig-kpi-total');
+            const kpiReporters = document.getElementById('sig-kpi-reporters');
+            const kpiReview = document.getElementById('sig-kpi-review');
+            const kpiResolved = document.getElementById('sig-kpi-resolved');
+
+            if (kpiTotal) kpiTotal.textContent = total;
+            if (kpiReporters) kpiReporters.textContent = reporters;
+            if (kpiReview) kpiReview.textContent = reviewCount;
+            if (kpiResolved) kpiResolved.textContent = resolvedCount;
+        }
+
+        function filterSignals() {
+            const query = (document.getElementById('signalSearchQuery')?.value || '').toLowerCase().trim();
+            const cat = document.getElementById('signalFilterCategory')?.value || '';
+            const st = document.getElementById('signalFilterStatus')?.value || '';
+
+            let filtered = allSignalsData || [];
+
+            if (cat) filtered = filtered.filter(s => s.category === cat);
+            if (st) filtered = filtered.filter(s => s.status === st);
+            if (query) {
+                filtered = filtered.filter(s => {
+                    const text = `${s.category} ${s.sub_category || ''} ${s.raw_input_text || ''} ${s.translated_english_text || ''} ${s.location?.generalized_location_str || ''} ${s.location?.district || ''}`.toLowerCase();
+                    return text.includes(query);
+                });
+            }
+
+            renderSignals(filtered);
+        }
+
+        function renderSignals(filteredData = null) {
+            const dataset = filteredData || allSignalsData || [];
+            updateSignalKPIs(dataset);
+            renderSignalsCards(dataset);
+            renderSignalsTable(dataset);
+        }
+
+        function renderSignalsCards(dataset) {
+            const container = document.getElementById('signalsCardsView');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!dataset || dataset.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 dark:text-slate-500">
+                        <span class="text-3xl">🔍</span>
+                        <p class="text-xs font-semibold mt-2">No citizen grievances found matching your search filter.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const categoryIcons = {
+                'Road Infrastructure': '🛣️',
+                'Water': '🚰',
+                'Healthcare': '🏥',
+                'Education': '🏫',
+                'Drainage': '🌊',
+                'Streetlights': '💡'
+            };
+
+            const statusStyles = {
+                'ANALYZED': 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+                'UNDER_REVIEW': 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30',
+                'ACTION_TAKEN': 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30',
+                'RESOLVED': 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30'
+            };
+
+            const severityStyles = {
+                'High': 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/25',
+                'Medium': 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/25',
+                'Low': 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+            };
+
+            dataset.forEach(s => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-amber-500/40 hover:shadow-md transition-all space-y-4 flex flex-col justify-between shadow-xs";
+
+                const count = s.reporters_count || (s.community_reports ? s.community_reports.length : 1);
+                const reportsBadge = count > 1 
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 font-bold border border-blue-500/25 text-[11px]">👥 ${count} Co-Reporters</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium text-[10px]">👤 1 Citizen</span>`;
+
+                const evidencePills = [];
+                if (s.evidence?.has_voice) evidencePills.push('<span class="text-[10px] px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 font-bold">🎤 Voice Verified</span>');
+                if (s.evidence?.has_image) evidencePills.push('<span class="text-[10px] px-2 py-0.5 rounded-lg bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 font-bold">📷 Photo Analyzed</span>');
+                if (s.location?.auto_detected || s.evidence?.has_location) evidencePills.push('<span class="text-[10px] px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 font-bold">📍 GPS Auto-Pin</span>');
+
+                const rawTitle = s.sub_category || s.translated_english_text || s.raw_input_text || s.category || 'Civic Issue';
+                const cleanTitle = (typeof rawTitle === 'string' && rawTitle.startsWith('[Auto-translated]: ')) ? rawTitle.replace('[Auto-translated]: ', '') : rawTitle;
+                const displayTitle = (typeof cleanTitle === 'string' && cleanTitle.includes('???')) ? `${s.category} Issue at ${s.location?.generalized_location_str || 'Location'}` : cleanTitle;
+                const targetKey = s.cluster_id || s.reference_number;
+
+                const catIcon = categoryIcons[s.category] || '🏛️';
+                const lat = s.location?.lat || 16.69;
+                const lng = s.location?.lng || 76.84;
+                const locationStr = s.location?.generalized_location_str || `${s.location?.taluk_block || ''} ${s.location?.district || 'Karnataka'}`;
+                const timeAgo = s.created_at ? new Date(s.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : 'Recent';
+
+                card.innerHTML = `
+                    <div class="space-y-3.5">
+                        <!-- Top Tags -->
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-500/20">${catIcon} ${s.category}</span>
+                                <span class="px-2 py-0.5 rounded-lg border text-[10px] font-bold ${severityStyles[s.severity] || 'bg-slate-100 text-slate-700'}">${s.severity} Priority</span>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusStyles[s.status] || 'bg-slate-100 text-slate-700'}">${s.status.replace('_', ' ')}</span>
+                        </div>
+
+                        <!-- Problem Statement -->
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">${displayTitle}</h4>
+                        </div>
+
+                        <!-- Location & Grouping Bar -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/70 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between text-xs gap-2">
+                                <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold truncate">
+                                    📍 ${locationStr}
+                                </a>
+                                ${reportsBadge}
+                            </div>
+                            ${s.latest_action_notes ? `
+                                <div class="text-[11px] text-amber-900 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20 font-medium">
+                                    <strong>💬 ${s.updated_by || 'Officer'}:</strong> "${s.latest_action_notes}"
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Evidence Tag Strip -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            ${evidencePills.join('') || '<span class="text-slate-400 text-[10px]">📝 Text Input</span>'}
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">📅 ${timeAgo}</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openSignalDetailModal('${targetKey}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all shadow-xs">🔍 Details</button>
+                            <button onclick="openStatusModal('${targetKey}')" class="px-3 py-1.5 rounded-xl bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] text-xs font-bold shadow-xs transition-all">⚡ Update</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderSignalsTable(dataset) {
+            const table = document.getElementById('signalsTableBody');
+            if (!table) return;
+            table.innerHTML = '';
+
+            if (!dataset || dataset.length === 0) {
+                table.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No citizen signals found for this jurisdiction filter.</td></tr>`;
+                return;
+            }
+
+            const statusColors = {
+                'ANALYZED': 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
+                'UNDER_REVIEW': 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25',
+                'ACTION_TAKEN': 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-500/25',
+                'RESOLVED': 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/25'
+            };
+
+            const severityBadges = {
+                'High': '<span class="px-2 py-0.5 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-400 font-bold text-[11px]">🔴 High</span>',
+                'Medium': '<span class="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold text-[11px]">🟡 Medium</span>',
+                'Low': '<span class="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold text-[11px]">🟢 Low</span>'
+            };
+
+            dataset.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors border-b border-slate-100 dark:border-slate-800/60";
+                
+                const count = s.reporters_count || (s.community_reports ? s.community_reports.length : 1);
+                const reportsBadge = count > 1 
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 font-bold border border-blue-500/25 text-[11px] whitespace-nowrap">👥 ${count} Citizens</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold text-[11px] whitespace-nowrap">👤 1 Citizen</span>`;
+
+                const evidencePills = [];
+                if (s.evidence?.has_voice) evidencePills.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 font-bold">🎤 Voice</span>');
+                if (s.evidence?.has_image) evidencePills.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 font-bold">📷 Photo</span>');
+                if (s.location?.auto_detected || s.evidence?.has_location) evidencePills.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 font-bold">📍 GPS</span>');
+
+                const rawTitle = s.sub_category || s.translated_english_text || s.raw_input_text || s.category || 'Civic Issue';
+                const cleanTitle = (typeof rawTitle === 'string' && rawTitle.startsWith('[Auto-translated]: ')) ? rawTitle.replace('[Auto-translated]: ', '') : rawTitle;
+                const displayTitle = (typeof cleanTitle === 'string' && cleanTitle.includes('???')) ? `${s.category} Issue at ${s.location?.generalized_location_str || 'Location'}` : cleanTitle;
+                const targetKey = s.cluster_id || s.reference_number;
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 max-w-xs sm:max-w-sm">
+                        <div class="space-y-1">
+                            <p class="font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">${displayTitle}</p>
+                            <span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-[10px] font-bold uppercase tracking-wider">${s.category}</span>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-3">
+                        <a href="https://www.google.com/maps?q=${s.location?.lat || 16.69},${s.location?.lng || 76.84}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1 font-semibold text-xs whitespace-nowrap">
+                            📍 ${s.location?.generalized_location_str || 'Karnataka'}
+                        </a>
+                    </td>
+                    <td class="py-3.5 px-3">${reportsBadge}</td>
+                    <td class="py-3.5 px-3 whitespace-nowrap">${severityBadges[s.severity] || s.severity}</td>
+                    <td class="py-3.5 px-3"><div class="flex gap-1 flex-wrap">${evidencePills.join('') || '<span class="text-slate-400 text-[10px]">📝 Text</span>'}</div></td>
+                    <td class="py-3.5 px-3 whitespace-nowrap"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${statusColors[s.status] || 'bg-slate-100 text-slate-700'}">${s.status}</span></td>
+                    <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                        <button onclick="openSignalDetailModal('${targetKey}')" class="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-bold mr-1.5 transition-colors">Details</button>
+                        <button onclick="openStatusModal('${targetKey}')" class="px-3 py-1.5 rounded-xl bg-[#091426] hover:bg-[#152244] dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-[#091426] text-xs font-bold shadow-xs transition-colors">Update</button>
+                    </td>
+                `;
+                table.appendChild(tr);
+            });
+        }
+
+        function openSignalDetailModal(key) {
+            const signal = allSignalsData.find(s => s.cluster_id === key || s.reference_number === key || (s.linked_reference_numbers && s.linked_reference_numbers.includes(key)));
+            if (!signal) return;
+
+            const count = signal.reporters_count || (signal.community_reports ? signal.community_reports.length : 1);
+
+            document.getElementById('detailModalCategoryHeading').textContent = `${signal.category} — ${signal.location?.generalized_location_str || 'Civic Issue'}`;
+            document.getElementById('detailModalCategory').textContent = signal.category;
+            document.getElementById('detailModalSeverity').textContent = `Severity: ${signal.severity}`;
+            document.getElementById('detailModalUrgency').textContent = `Urgency: ${signal.urgency || 'Standard'}`;
+            document.getElementById('detailModalStatus').textContent = signal.status;
+            document.getElementById('detailModalText').textContent = signal.raw_input_text || signal.translated_english_text || 'No text available';
+            document.getElementById('detailModalReportsCount').textContent = `👥 ${count} Citizen${count > 1 ? 's' : ''}`;
+            document.getElementById('detailModalReportCountBadge').textContent = `${count} Report${count > 1 ? 's' : ''}`;
+
+            const reportTypeLabels = { 'EXISTING_DAMAGED': '🔧 Existing Damaged', 'NEW_INFRASTRUCTURE': '🆕 New Infrastructure', 'SAFETY_HAZARD': '⚠️ Safety Hazard' };
+            document.getElementById('detailModalReportType').textContent = reportTypeLabels[signal.report_type] || '🔧 Existing Damaged';
+
+            // Evidence
+            const evidenceEl = document.getElementById('detailModalEvidence');
+            evidenceEl.innerHTML = '';
+            if (signal.evidence?.has_voice) evidenceEl.innerHTML += '<span class="px-2 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 font-bold">🎤 Voice Note Processed</span>';
+            if (signal.evidence?.has_image) evidenceEl.innerHTML += '<span class="px-2 py-1 rounded-lg bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 font-bold">📷 Photo Analyzed</span>';
+            if (signal.evidence?.has_location) evidenceEl.innerHTML += '<span class="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 font-bold">📍 GPS Auto-Detected</span>';
+            if (signal.evidence?.has_text) evidenceEl.innerHTML += '<span class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold">📝 Text Input</span>';
+            if (!evidenceEl.innerHTML) evidenceEl.innerHTML = '<span class="text-slate-400">No evidence metadata</span>';
+
+            // Location
+            const lat = signal.location?.lat || 16.69;
+            const lng = signal.location?.lng || 76.84;
+            document.getElementById('detailModalLocation').textContent = signal.location?.generalized_location_str || 'Karnataka';
+            document.getElementById('detailModalMapLink').href = `https://www.google.com/maps?q=${lat},${lng}`;
+
+            // Community Co-Reporters List
+            const communityList = document.getElementById('detailModalCommunityList');
+            communityList.innerHTML = '';
+
+            const reports = signal.community_reports || [{
+                reference_number: signal.reference_number,
+                citizen_id: signal.citizen_id,
+                phone_number: signal.phone_number,
+                raw_input_text: signal.raw_input_text,
+                created_at: signal.created_at,
+                evidence: signal.evidence
+            }];
+
+            reports.forEach((rep, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-xs space-y-1.5 shadow-xs";
+                
+                const timeStr = rep.created_at ? new Date(rep.created_at).toLocaleString('en-IN') : '--';
+                const reporterLabel = rep.citizen_id ? `Citizen ID: ${rep.citizen_id}` : (rep.phone_number ? `Phone: ${rep.phone_number}` : `Reporter #${idx + 1}`);
+                
+                const repEvidence = [];
+                if (rep.evidence?.has_voice) repEvidence.push('🎤 Voice');
+                if (rep.evidence?.has_image) repEvidence.push('📷 Photo');
+                if (rep.evidence?.has_location) repEvidence.push('📍 GPS');
+
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">${rep.reference_number || signal.reference_number}</span>
+                        <span class="text-[10px] text-slate-500">${timeStr}</span>
+                    </div>
+                    <p class="text-slate-800 dark:text-slate-200 text-xs leading-relaxed font-medium mt-1">"${rep.raw_input_text || 'No text provided'}"</p>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100 dark:border-slate-700/50 mt-1">
+                        <span class="font-medium text-slate-600 dark:text-slate-400">${reporterLabel}</span>
+                        <span class="text-blue-600 dark:text-blue-400 font-semibold">${repEvidence.join(' • ') || '📝 Text'}</span>
+                    </div>
+                `;
+                communityList.appendChild(item);
+            });
+
+            // Date
+            document.getElementById('detailModalDate').textContent = signal.created_at ? new Date(signal.created_at).toLocaleString('en-IN') : '--';
+            document.getElementById('detailModalLang').textContent = (signal.language || 'en').toUpperCase();
+
+            document.getElementById('signalDetailModal').classList.remove('hidden');
+        }
+
+        function closeSignalDetailModal() {
+            document.getElementById('signalDetailModal').classList.add('hidden');
+        }
+
+        // Render Hotspots Grid
+        function renderHotspotsGrid() {
+            const grid = document.getElementById('hotspotsGrid');
+            grid.innerHTML = '';
+
+            allIssuesData.forEach(h => {
+                const card = document.createElement('div');
+                card.className = "glass-panel rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between shadow-sm";
+                
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-mono font-bold uppercase text-slate-500 dark:text-slate-400">${h.district} &middot; ${h.category}</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-black font-mono bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                                ${(h.priority_score || 0).toFixed(1)} / 100
+                            </span>
+                        </div>
+                        <h4 class="font-serif text-sm font-bold text-slate-900 dark:text-white">${h.title}</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">${h.population_affected ? h.population_affected.toLocaleString() + ' residents impacted' : 'Community impact zone'}</p>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">${h.signal_count} Verified Signals</span>
+                        <button onclick="openScoreModal('${h.issue_id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 text-xs font-bold transition-all">
+                            6-Factor Score &rarr;
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Score Modal & NITI Data
+        function openScoreModal(issueId) {
+            const issue = allIssuesData.find(i => i.issue_id === issueId);
+            if (!issue) return;
+
+            document.getElementById('scoreModalTitle').textContent = issue.title;
+            document.getElementById('scoreModalTotal').innerHTML = `${(issue.priority_score || 0).toFixed(1)} <span class="text-xs font-normal text-slate-400">/ 100</span>`;
+            document.getElementById('scoreModalSignals').textContent = `${issue.signal_count} Verified Signals`;
+
+            const factorsContainer = document.getElementById('scoreModalFactors');
+            factorsContainer.innerHTML = '';
+
+            const breakdown = issue.score_breakdown || {};
+            const factors = [
+                { label: 'Citizen Demand (30%)', obj: breakdown.citizen_demand, max: 30 },
+                { label: 'Population Affected (20%)', obj: breakdown.population_affected, max: 20 },
+                { label: 'Infrastructure Gap (20%)', obj: breakdown.infrastructure_gap, max: 20 },
+                { label: 'Severity Tier (15%)', obj: breakdown.severity, max: 15 },
+                { label: 'Urgency & Trend (10%)', obj: breakdown.urgency_trend, max: 10 },
+                { label: 'Evidence Confidence (5%)', obj: breakdown.evidence_confidence, max: 5 },
+            ];
+
+            factors.forEach(f => {
+                const score = f.obj?.weighted_score || 0;
+                const raw = f.obj?.raw_val || '--';
+                const pct = Math.min(100, Math.round((score / f.max) * 100));
+
+                const row = document.createElement('div');
+                row.className = "p-3 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs";
+                row.innerHTML = `
+                    <div class="flex justify-between font-semibold">
+                        <span class="text-slate-700 dark:text-slate-300">${f.label}</span>
+                        <span class="text-amber-600 dark:text-amber-400 font-mono font-bold">${score.toFixed(1)} / ${f.max} pts</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-amber-500 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                    </div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400">${raw}</div>
+                `;
+                factorsContainer.appendChild(row);
+            });
+
+            // NITI
+            const nitiSource = issue.niti_evidence?.source || 'NITI Aayog Baseline (Cached)';
+            document.getElementById('scoreModalNitiSource').textContent = nitiSource;
+            document.getElementById('scoreModalNitiDesc').textContent = `Deprivation Index: ${issue.deprivation_score || 0.71} | Source: Champions of Change Aspirational District Matrix (${issue.district})`;
+
+            document.getElementById('scoreModal').classList.remove('hidden');
+        }
+
+        function closeScoreModal() {
+            document.getElementById('scoreModal').classList.add('hidden');
+        }
+
+        // Status Update Modal
+        let activeStatusRef = '';
+        function openStatusModal(key) {
+            const signal = allSignalsData.find(s => s.cluster_id === key || s.reference_number === key || (s.linked_reference_numbers && s.linked_reference_numbers.includes(key)));
+            activeStatusRef = signal ? signal.reference_number : key;
+            const count = signal ? (signal.reporters_count || (signal.community_reports ? signal.community_reports.length : 1)) : 1;
+
+            const categoryLocationEl = document.getElementById('modalTargetCategoryLocation');
+            if (categoryLocationEl) {
+                categoryLocationEl.textContent = signal ? `${signal.category} — ${signal.location?.generalized_location_str || 'Karnataka'}` : 'Civic Issue';
+            }
+
+            const reportersCountEl = document.getElementById('modalTargetReportersCount');
+            if (reportersCountEl) {
+                reportersCountEl.textContent = `👥 ${count} Citizen${count > 1 ? 's' : ''}`;
+            }
+
+            const broadcastTextEl = document.getElementById('statusModalBroadcastText');
+            if (broadcastTextEl) {
+                broadcastTextEl.textContent = count > 1
+                    ? `Updating this ticket will automatically update all ${count} linked citizen reports and broadcast in-app and WhatsApp notifications to all ${count} co-reporters.`
+                    : `Updating this ticket will notify the reporting citizen with official notes via in-app alerts and WhatsApp.`;
+            }
+
+            document.getElementById('statusModal').classList.remove('hidden');
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.add('hidden');
+        }
+
+        async function submitStatusUpdate(e) {
+            e.preventDefault();
+            const status = document.getElementById('modalNewStatus').value;
+            const notes = document.getElementById('modalOfficerNotes').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/signals/${activeStatusRef}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status,
+                        notes,
+                        officer_name: currentAuthUser?.name || 'Authorized Officer',
+                        officer_role: currentAuthUser?.role || 'DISTRICT_AUTHORITY'
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    closeStatusModal();
+                    loadOverview();
+                    const notifCount = data.notified_citizens_count || 1;
+                    alert(`✓ Case ${activeStatusRef} updated to ${status} and broadcasted to ${notifCount} citizen(s)!`);
+                } else {
+                    alert(data.error || 'Failed to update status.');
+                }
+            } catch (err) {
+                alert('Failed to connect with server.');
+            }
+        }
+
+        // National Rollup
+        async function loadNationalRollup() {
+            try {
+                const res = await fetch(`${API_BASE}/analytics/national-rollup`);
+                const data = await res.json();
+                const tbody = document.getElementById('nationalRollupBody');
+                tbody.innerHTML = '';
+
+                (data.national_rollup || []).forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors border-b border-slate-100 dark:border-slate-800/60";
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 font-bold text-amber-600 dark:text-amber-400">#${r.rank}</td>
+                        <td class="py-3 px-3 text-slate-700 dark:text-slate-300 font-semibold">${r.state}</td>
+                        <td class="py-3 px-3 text-slate-900 dark:text-white font-bold">${r.district}</td>
+                        <td class="py-3 px-3 text-slate-600 dark:text-slate-400">${r.category}</td>
+                        <td class="py-3 px-3 font-mono font-black text-amber-600 dark:text-amber-400">${(r.composite_score || 0).toFixed(1)}</td>
+                        <td class="py-3 px-3 text-blue-600 dark:text-blue-400 font-bold">${r.signal_count}</td>
+                        <td class="py-3 px-3 text-slate-600 dark:text-slate-400">${r.population_affected ? r.population_affected.toLocaleString() : '--'}</td>
+                        <td class="py-3 px-3 text-[10px] text-slate-500">${r.niti_evidence?.source || 'NITI Aayog'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {}
+        }
+
+        // AI Copilot Studio
+        function askCopilot(query) {
+            document.getElementById('copilotQuery').value = query;
+            handleCopilotSubmit(new Event('submit'));
+        }
+
+        async function handleCopilotSubmit(e) {
+            e.preventDefault();
+            const q = document.getElementById('copilotQuery').value.trim();
+            if (!q) return;
+
+            const btn = document.getElementById('copilotBtn');
+            const spinner = document.getElementById('copilotSpinner');
+            const btnText = document.getElementById('copilotBtnText');
+            const card = document.getElementById('copilotOutputCard');
+            const textEl = document.getElementById('copilotResponseText');
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            btnText.textContent = 'Generating Briefing...';
+
+            try {
+                const res = await fetch(`${API_BASE}/copilot/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: q })
+                });
+                const data = await res.json();
+                textEl.textContent = data.answer || 'No response generated.';
+                card.classList.remove('hidden');
+                card.scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                textEl.textContent = 'Error connecting to Gemini AI Copilot.';
+                card.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.textContent = 'Consult';
+            }
+        }
+
+        function copyCopilotAnswer() {
+            const txt = document.getElementById('copilotResponseText').textContent;
+            navigator.clipboard.writeText(txt);
+            alert('Briefing copied to clipboard.');
+        }
+
+        // Budget Planner
+        async function loadBudgetPlanner() {
+            try {
+                const res = await fetch(`${API_BASE}/analytics/budget-recommendations${getJurisdictionQuery()}`);
+                const data = await res.json();
+                const container = document.getElementById('budgetContainer');
+                container.innerHTML = '';
+
+                (data.recommendations || []).forEach(b => {
+                    const row = document.createElement('div');
+                    row.className = "p-4 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm";
+                    row.innerHTML = `
+                        <div class="space-y-1 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Rank #${b.rank}</span>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white">${b.district} (${b.state}) &middot; ${b.category}</span>
+                            </div>
+                            <p class="text-xs text-blue-600 dark:text-blue-300 font-medium">Scheme: ${b.applicable_scheme}</p>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">${b.action}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Recommended Allocation</span>
+                            <h3 class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">₹ ${b.recommended_allocation_cr} Cr</h3>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">${b.allocation_pct}% of pool</span>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            } catch (e) {}
+        }
+
+        // Officer Performance Leaderboard
+        async function loadPerformance() {
+            try {
+                const res = await fetch(`${API_BASE}/analytics/officer-performance`);
+                const data = await res.json();
+                const tbody = document.getElementById('officerLeaderboardBody');
+                tbody.innerHTML = '';
+
+                (data.officers || []).forEach(o => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors border-b border-slate-100 dark:border-slate-800/60";
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 font-bold text-slate-900 dark:text-white">${o.name}</td>
+                        <td class="py-3 px-3 text-slate-600 dark:text-slate-400"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono text-[10px] font-bold">${o.role}</span></td>
+                        <td class="py-3 px-3 font-bold text-blue-600 dark:text-blue-400 font-mono">${o.actions_taken}</td>
+                        <td class="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400 font-mono">${o.cases_resolved}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {}
+        }
+
+        // Trigger Auto-Escalation
+        async function triggerEscalation() {
+            const btn = document.getElementById('escalateBtn');
+            const resEl = document.getElementById('escalationResult');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/analytics/run-escalation`, { method: 'POST' });
+                const data = await res.json();
+                resEl.textContent = `Escalation completed: Checked ${data.checked} signals, auto-escalated ${data.escalated} overdue cases.`;
+                resEl.classList.remove('hidden');
+                loadOverview();
+            } catch (e) {
+                resEl.textContent = 'Escalation trigger failed.';
+                resEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Leaflet Interactive Map
+        function initMap() {
+            if (leafletMap) {
+                leafletMap.invalidateSize();
+                return;
+            }
+
+            leafletMap = L.map('map', {
+                center: [12.3551, 77.2142],
+                zoom: 9,
+                zoomControl: true
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(leafletMap);
+
+            // Add Hotspot Pins
+            allIssuesData.forEach(h => {
+                if (h.center_location && h.center_location.lat && h.center_location.lng) {
+                    const marker = L.circleMarker([h.center_location.lat, h.center_location.lng], {
+                        radius: 12,
+                        fillColor: '#EA580C',
+                        color: '#1E293B',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(leafletMap);
+
+                    marker.bindPopup(`
+                        <div style="font-family: 'Inter', sans-serif; color: #0F172A; min-width: 180px;">
+                            <strong style="font-size: 13px;">${h.title}</strong><br/>
+                            <span style="font-size: 11px; color: #64748B;">${h.district} &middot; ${h.category}</span><br/>
+                            <span style="font-size: 12px; font-weight: bold; color: #EA580C;">Priority Score: ${(h.priority_score || 0).toFixed(1)}</span><br/>
+                            <span style="font-size: 11px; color: #0284C7;">Verified Signals: ${h.signal_count}</span>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        // ─── Officer Allocation & Access Management ───────────────────────────
+        let allOfficersData = [];
+
+        async function loadOfficers() {
+            try {
+                const res = await fetch(`${API_BASE}/auth/officers`);
+                const data = await res.json();
+                allOfficersData = data.officers || [];
+
+                // Admin Stats
+                document.getElementById('admin-total-officers').textContent = allOfficersData.length;
+                const dists = new Set(allOfficersData.map(o => o.district).filter(Boolean));
+                document.getElementById('admin-jurisdictions').textContent = `${dists.size} Districts`;
+                document.getElementById('admin-field-officers').textContent = allOfficersData.filter(o => ['FIELD_OFFICER', 'DEPARTMENT_OFFICER'].includes(o.role)).length;
+                document.getElementById('admin-admin-officers').textContent = allOfficersData.filter(o => ['DISTRICT_AUTHORITY', 'STATE_AUTHORITY', 'NATIONAL_POLICYMAKER'].includes(o.role)).length;
+
+                const tbody = document.getElementById('officersTableBody');
+                tbody.innerHTML = '';
+
+                const roleBadges = {
+                    'FIELD_OFFICER': 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/25',
+                    'DEPARTMENT_OFFICER': 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/25',
+                    'DISTRICT_AUTHORITY': 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/25',
+                    'STATE_AUTHORITY': 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/25',
+                    'NATIONAL_POLICYMAKER': 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                };
+
+                allOfficersData.forEach(o => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors border-b border-slate-100 dark:border-slate-800/60";
+                    const reg = o.district ? `${o.district}, ${o.state}` : (o.state || 'National');
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 font-mono font-bold text-amber-700 dark:text-amber-400">${o.id}</td>
+                        <td class="py-3 px-3 font-bold text-slate-900 dark:text-white">${o.name}</td>
+                        <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${roleBadges[o.role] || 'bg-slate-100 text-slate-700'}">${o.role}</span></td>
+                        <td class="py-3 px-3 text-slate-700 dark:text-slate-300 font-medium">${o.designation}</td>
+                        <td class="py-3 px-3 text-blue-600 dark:text-blue-300 font-medium">${reg}</td>
+                        <td class="py-3 px-3 font-mono text-slate-600 dark:text-slate-400 text-[11px]">${o.email}</td>
+                        <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 text-[10px] font-bold">ACTIVE</span></td>
+                        <td class="py-3 px-3 text-right space-x-1">
+                            <button onclick="editOfficer('${o.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 text-[11px] font-bold">Edit</button>
+                            <button onclick="copyCredentials('${o.email}', '${o.role}')" class="px-2 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 text-[11px] font-bold">Copy</button>
+                            <button onclick="revokeOfficer('${o.id}', '${o.name}')" class="px-2 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 text-[11px] font-bold">Revoke</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('Failed to load officers:', err);
+            }
+        }
+
+        function populateDesignations(role, selectedVal) {
+            const desigSelect = document.getElementById('officerDesignationSelect');
+            desigSelect.innerHTML = '';
+            const opts = DESIGNATIONS_BY_TIER[role] || [];
+            opts.forEach(d => {
+                desigSelect.add(new Option(d, d));
+            });
+            desigSelect.add(new Option('Other (Custom)...', 'CUSTOM'));
+            
+            if (opts.includes(selectedVal)) {
+                desigSelect.value = selectedVal;
+                handleDesignationSelect();
+            } else if (selectedVal) {
+                desigSelect.value = 'CUSTOM';
+                handleDesignationSelect();
+                document.getElementById('officerDesignationCustom').value = selectedVal;
+            } else {
+                handleDesignationSelect();
+            }
+        }
+
+        function handleDesignationSelect() {
+            const sel = document.getElementById('officerDesignationSelect').value;
+            const customInput = document.getElementById('officerDesignationCustom');
+            if (sel === 'CUSTOM') {
+                customInput.classList.remove('hidden');
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                customInput.required = false;
+            }
+        }
+
+        function populateStates(selectedState) {
+            const stateSel = document.getElementById('officerStateSelect');
+            stateSel.innerHTML = '';
+            Object.keys(INDIAN_LOCATIONS).forEach(st => stateSel.add(new Option(st, st)));
+            if (selectedState && INDIAN_LOCATIONS[selectedState]) {
+                stateSel.value = selectedState;
+            } else {
+                stateSel.value = 'Karnataka';
+            }
+            handleStateChange();
+        }
+
+        function handleStateChange() {
+            const st = document.getElementById('officerStateSelect').value;
+            populateDistricts(st, null);
+        }
+
+        function populateDistricts(state, selectedDistrict) {
+            const distSel = document.getElementById('officerDistrictSelect');
+            distSel.innerHTML = '';
+            const districts = INDIAN_LOCATIONS[state] ? Object.keys(INDIAN_LOCATIONS[state]) : [];
+            districts.forEach(d => distSel.add(new Option(d, d)));
+            
+            if (selectedDistrict && districts.includes(selectedDistrict)) {
+                distSel.value = selectedDistrict;
+            } else if (state === 'Karnataka') {
+                distSel.value = 'Mandya';
+            }
+            handleDistrictChange();
+        }
+
+        function handleDistrictChange() {
+            const st = document.getElementById('officerStateSelect').value;
+            const dt = document.getElementById('officerDistrictSelect').value;
+            populateCities(st, dt, null);
+        }
+
+        function populateCities(state, district, selectedCity) {
+            const citySel = document.getElementById('officerCitySelect');
+            citySel.innerHTML = '<option value="">-- Entire District --</option>';
+            const cities = (INDIAN_LOCATIONS[state] && INDIAN_LOCATIONS[state][district]) ? INDIAN_LOCATIONS[state][district] : [];
+            cities.forEach(c => citySel.add(new Option(c, c)));
+            
+            if (selectedCity && cities.includes(selectedCity)) {
+                citySel.value = selectedCity;
+            } else if (state === 'Karnataka' && district === 'Mandya') {
+                citySel.value = 'Halaguru (Malavalli)';
+            }
+        }
+
+        function handleCityChange() {}
+
+        function handleRoleChange() {
+            const role = document.getElementById('officerRole').value;
+            populateDesignations(role, null);
+            
+            const stateCont = document.getElementById('stateContainer');
+            const distCont = document.getElementById('districtContainer');
+            const cityCont = document.getElementById('cityContainer');
+            const banner = document.getElementById('jurisdictionRoleLabel');
+            
+            if (role === 'NATIONAL_POLICYMAKER') {
+                stateCont.style.display = 'none';
+                distCont.style.display = 'none';
+                cityCont.style.display = 'none';
+                banner.textContent = 'National Level (All India)';
+            } else if (role === 'STATE_AUTHORITY') {
+                stateCont.style.display = 'block';
+                distCont.style.display = 'none';
+                cityCont.style.display = 'none';
+                banner.textContent = 'State Level';
+            } else if (role === 'DISTRICT_AUTHORITY') {
+                stateCont.style.display = 'block';
+                distCont.style.display = 'block';
+                cityCont.style.display = 'none';
+                banner.textContent = 'District Level';
+            } else if (role === 'DEPARTMENT_OFFICER') {
+                stateCont.style.display = 'block';
+                distCont.style.display = 'block';
+                cityCont.style.display = 'block';
+                banner.textContent = 'Department / Sub-Division Level';
+            } else if (role === 'FIELD_OFFICER') {
+                stateCont.style.display = 'block';
+                distCont.style.display = 'block';
+                cityCont.style.display = 'block';
+                banner.textContent = 'Field / Taluk Level';
+            }
+        }
+
+        function openOfficerModal() {
+            document.getElementById('officerModalTitle').textContent = 'Allocate New Government Officer';
+            document.getElementById('officerEditId').value = '';
+            document.getElementById('officerName').value = '';
+            document.getElementById('officerEmail').value = '';
+            document.getElementById('officerPassword').value = 'gov123';
+            document.getElementById('officerRole').value = 'FIELD_OFFICER';
+            document.getElementById('officerJurisdictionDetails').value = '';
+            
+            handleRoleChange();
+            populateStates('Karnataka');
+            
+            document.getElementById('officerModal').classList.remove('hidden');
+        }
+
+        function closeOfficerModal() {
+            document.getElementById('officerModal').classList.add('hidden');
+        }
+
+        function editOfficer(id) {
+            const o = allOfficersData.find(x => x.id === id);
+            if (!o) return;
+
+            document.getElementById('officerModalTitle').textContent = `Edit Jurisdiction & Access: ${o.name}`;
+            document.getElementById('officerEditId').value = o.id;
+            document.getElementById('officerName').value = o.name;
+            document.getElementById('officerEmail').value = o.email;
+            document.getElementById('officerPassword').value = '';
+            document.getElementById('officerRole').value = o.role;
+            
+            handleRoleChange();
+            populateDesignations(o.role, o.designation);
+            
+            populateStates(o.state || 'Karnataka');
+            populateDistricts(document.getElementById('officerStateSelect').value, o.district);
+            populateCities(document.getElementById('officerStateSelect').value, document.getElementById('officerDistrictSelect').value, o.jurisdiction?.taluk);
+            
+            document.getElementById('officerJurisdictionDetails').value = o.jurisdiction?.department || '';
+            document.getElementById('officerModal').classList.remove('hidden');
+        }
+
+        async function saveOfficer(e) {
+            e.preventDefault();
+            const editId = document.getElementById('officerEditId').value;
+            const name = document.getElementById('officerName').value.trim();
+            const email = document.getElementById('officerEmail').value.trim();
+            const password = document.getElementById('officerPassword').value.trim();
+            const role = document.getElementById('officerRole').value;
+            
+            let designation = document.getElementById('officerDesignationSelect').value;
+            if (designation === 'CUSTOM') {
+                designation = document.getElementById('officerDesignationCustom').value.trim();
+            }
+            
+            const state = (role !== 'NATIONAL_POLICYMAKER') ? document.getElementById('officerStateSelect').value : '';
+            const district = (role === 'DISTRICT_AUTHORITY' || role === 'DEPARTMENT_OFFICER' || role === 'FIELD_OFFICER') ? document.getElementById('officerDistrictSelect').value : '';
+            const city = (role === 'DEPARTMENT_OFFICER' || role === 'FIELD_OFFICER') ? document.getElementById('officerCitySelect').value : '';
+            const customDetails = document.getElementById('officerJurisdictionDetails').value.trim();
+
+            let jurisdiction_taluk = city;
+            if (customDetails) {
+                jurisdiction_taluk = jurisdiction_taluk ? `${jurisdiction_taluk}, ${customDetails}` : customDetails;
+            }
+
+            const payload = { name, email, role, designation, state, district, jurisdiction_taluk };
+            if (password) payload.password = password;
+
+            try {
+                const url = editId ? `${API_BASE}/auth/officers/${editId}` : `${API_BASE}/auth/officers`;
+                const method = editId ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    closeOfficerModal();
+                    loadOfficers();
+                    alert(data.message || 'Officer access successfully configured!');
+                } else {
+                    alert(data.error || 'Failed to save officer.');
+                }
+            } catch (err) {
+                alert('Server error saving officer.');
+            }
+        }
+
+        async function revokeOfficer(id, name) {
+            if (!confirm(`Are you sure you want to revoke authority portal access for ${name} (${id})?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/officers/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadOfficers();
+                    alert(`Access revoked for ${name}.`);
+                }
+            } catch (err) {
+                alert('Failed to revoke officer.');
+            }
+        }
+
+        function copyCredentials(email, role) {
+            const msg = `JanSetu AI Authority Portal Access\nPortal URL: http://localhost:3002/login\nEmail: ${email}\nRole: ${role}\nPassword: [Configured by Administrator]`;
+            navigator.clipboard.writeText(msg);
+            alert(`Credentials copied to clipboard for ${email}`);
+        }
+
+        // Initial Load
+        loadOverview();
+    </script>
+</body>
+</html>

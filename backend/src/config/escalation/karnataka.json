@@ -1,0 +1,29 @@
+{
+  "state": "Karnataka",
+  "rules": [
+    {
+      "trigger": "UNRESOLVED_DAYS_EXCEEDED",
+      "threshold_days": 14,
+      "severity": "High",
+      "escalate_from": "FIELD_OFFICER",
+      "escalate_to": "DEPARTMENT_OFFICER",
+      "action_required": "Mandatory site visit & progress report submission"
+    },
+    {
+      "trigger": "UNRESOLVED_DAYS_EXCEEDED",
+      "threshold_days": 30,
+      "severity": "High",
+      "escalate_from": "DEPARTMENT_OFFICER",
+      "escalate_to": "DISTRICT_AUTHORITY",
+      "action_required": "Deputy Commissioner review & contractor show-cause notice"
+    },
+    {
+      "trigger": "WARRANTY_DEFECT_FLAGGED",
+      "threshold_days": 7,
+      "severity": "High",
+      "escalate_from": "FIELD_OFFICER",
+      "escalate_to": "DISTRICT_AUTHORITY",
+      "action_required": "DLP Warranty enforcement & joint technical inspection"
+    }
+  ]
+}
