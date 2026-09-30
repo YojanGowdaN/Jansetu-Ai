@@ -23,6 +23,16 @@ const { geminiBotService } = require("../services/geminiBotService");
 let client = null;
 const recentChats = new Map(); // identifier -> Chat object
 
+let currentQr = null;
+let isReady = false;
+let connectedUser = null;
+
+const getStatus = () => ({
+  ready: isReady,
+  qr: currentQr,
+  user: connectedUser,
+});
+
 const connect = async () => {
   const { Client, LocalAuth } = require("whatsapp-web.js");
   const path = require("path");
@@ -48,21 +58,26 @@ const connect = async () => {
     ],
   };
 
-  // Dynamically locate installed Chrome binary from Puppeteer
+  // Dynamically locate installed Chrome binary from Puppeteer cache
   try {
-    const puppeteer = require("puppeteer");
-    let exe = null;
-    try { exe = puppeteer.executablePath(); } catch (_) {}
-    if (!exe || !fs.existsSync(exe)) {
-      logger.info("WhatsApp → Chrome binary not found in cache. Calling automated Chrome installer...");
-      const { ensureChrome } = require("../install-chrome");
-      exe = await ensureChrome();
-    }
-    if (exe && fs.existsSync(exe)) {
-      puppeteerOpts.executablePath = exe;
-      logger.info(`WhatsApp → Using Chrome binary at: ${exe}`);
+    const { getInstalledBrowsers } = require("@puppeteer/browsers");
+    const installed = await getInstalledBrowsers({ cacheDir });
+    const chromeBrowser = installed.find(b => b.browser === 'chrome' && fs.existsSync(b.executablePath));
+    
+    if (chromeBrowser) {
+      puppeteerOpts.executablePath = chromeBrowser.executablePath;
+      logger.info(`WhatsApp → Found installed Chrome in cache: ${chromeBrowser.executablePath}`);
+      if (process.platform !== 'win32') {
+        try { fs.chmodSync(chromeBrowser.executablePath, 0o755); } catch (_) {}
+      }
     } else {
-      logger.info("WhatsApp → Using default Puppeteer locator in: " + cacheDir);
+      logger.info("WhatsApp → Chrome binary not in cache. Calling automated Chrome installer...");
+      const { ensureChrome } = require("../install-chrome");
+      const exe = await ensureChrome();
+      if (exe && fs.existsSync(exe)) {
+        puppeteerOpts.executablePath = exe;
+        logger.info(`WhatsApp → Installed Chrome and set executable: ${exe}`);
+      }
     }
   } catch (err) {
     logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
@@ -73,16 +88,6 @@ const connect = async () => {
     authTimeoutMs: 120000,
     puppeteer: puppeteerOpts,
   });
-
-let currentQr = null;
-let isReady = false;
-let connectedUser = null;
-
-const getStatus = () => ({
-  ready: isReady,
-  qr: currentQr,
-  user: connectedUser,
-});
 
   // ── QR code ───────────────────────────────────────────────────────────────
   client.on("qr", (qr) => {
