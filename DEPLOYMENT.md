@@ -58,8 +58,8 @@ Scroll down to the **"Environment Variables"** section and click **"Add Environm
 | `GEMINI_API_KEY` | `AIzaSy...` | Your Google Gemini API Key from AI Studio |
 | `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini Model (e.g., `gemini-2.5-flash`) |
 | `JWT_SECRET` | `jansetu_prod_secret_2026_xyz` | Any secure random string |
-
-*(Optional variables like `NITI_API_KEY` or `WHATSAPP_PHONE` can be added if needed).*
+| `PUPPETEER_CACHE_DIR` | `/opt/render/project/src/.cache/puppeteer` | Keeps Chrome browser cached in project on Render |
+| `WHATSAPP_PHONE` | `916361163002` | Registered phone number for WhatsApp bot |
 
 ### Step 5: Deploy!
 1. Click **"Create Web Service"** at the bottom of the page.

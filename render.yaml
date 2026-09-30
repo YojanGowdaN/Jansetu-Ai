@@ -44,3 +44,10 @@ services:
 
       - key: RATE_LIMIT_MAX_REQUESTS
         value: 200
+
+      # WhatsApp Bot & Puppeteer Persistent Cache
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/src/.cache/puppeteer
+
+      - key: WHATSAPP_PHONE
+        value: 916361163002

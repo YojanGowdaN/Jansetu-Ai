@@ -25,24 +25,47 @@ const recentChats = new Map(); // identifier -> Chat object
 
 const connect = async () => {
   const { Client, LocalAuth } = require("whatsapp-web.js");
-  // Use a short absolute path for Chrome profile — long paths with spaces
-  // cause "Execution context was destroyed" errors in Puppeteer/WhatsApp Web.
-  const shortAuthPath = require("path").join(require("os").homedir(), ".jansetu-wa");
+  const path = require("path");
+  const fs = require("fs");
+
+  // Ensure Puppeteer uses the persistent cache directory in project root
+  const cacheDir = process.env.PUPPETEER_CACHE_DIR || path.join(__dirname, "..", "..", ".cache", "puppeteer");
+  process.env.PUPPETEER_CACHE_DIR = cacheDir;
+
+  const shortAuthPath = path.join(require("os").homedir(), ".jansetu-wa");
+
+  const puppeteerOpts = {
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--disable-gpu",
+      "--single-process",
+      "--no-zygote"
+    ],
+  };
+
+  // Dynamically locate installed Chrome binary from Puppeteer
+  try {
+    const puppeteer = require("puppeteer");
+    const exe = puppeteer.executablePath();
+    if (exe && fs.existsSync(exe)) {
+      puppeteerOpts.executablePath = exe;
+      logger.info(`WhatsApp → Found Chrome binary at: ${exe}`);
+    } else {
+      logger.info("WhatsApp → Looking for Chrome in project cache directory: " + cacheDir);
+    }
+  } catch (err) {
+    logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
+  }
 
   client = new Client({
     authStrategy: new LocalAuth({ dataPath: shortAuthPath }),
-    authTimeoutMs: 60000,
-    puppeteer: {
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--disable-gpu",
-      ],
-    },
+    authTimeoutMs: 120000,
+    puppeteer: puppeteerOpts,
   });
 
   // ── QR code ───────────────────────────────────────────────────────────────

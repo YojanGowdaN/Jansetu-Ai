@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install --prefix backend && npm install --prefix public-web && npm install --prefix authority-web",
+    "build": "npm --prefix whatsapp-bot install && npx --prefix whatsapp-bot puppeteer browsers install chrome",
+    "postinstall": "npm --prefix whatsapp-bot install && npx --prefix whatsapp-bot puppeteer browsers install chrome",
     "start:backend": "cd backend && npm start",
     "start:public": "cd public-web && npm start",
     "start:authority": "cd authority-web && npm start",
