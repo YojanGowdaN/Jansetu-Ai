@@ -209,7 +209,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 
 # Default WhatsApp Bot Phone (Country code + 10 digits without + or spaces)
-WHATSAPP_PHONE=916361163002
+WHATSAPP_PHONE=Your Whatsapp number here
 
 ALERT_SECRET=sentinel_cyber_intelligence_secret_2024
 FAKE_CONFIDENCE_THRESHOLD=90
