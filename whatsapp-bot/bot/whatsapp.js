@@ -50,12 +50,27 @@ const connect = async () => {
   const path = require("path");
   const fs = require("fs");
 
+  initProgress = "1/4: Locating Chrome browser binary...";
+  recordLog("Locating Chrome executable...");
+
   // Ensure Puppeteer uses the persistent cache directory in project root
   const cacheDir = process.env.PUPPETEER_CACHE_DIR || path.join(__dirname, "..", "..", ".cache", "puppeteer");
   process.env.PUPPETEER_CACHE_DIR = cacheDir;
 
-  const shortAuthPath = path.join(require("os").homedir(), ".jansetu-wa");
+  const authDataPath = path.join(__dirname, "..", ".wwebjs_auth");
 
+  // Clean up any stale lock files from previous runs
+  try {
+    const lockFiles = ["SingletonLock", "SingletonSocket", "SingletonCookie"];
+    for (const f of lockFiles) {
+      const lockPath = path.join(authDataPath, "session", f);
+      if (fs.existsSync(lockPath)) {
+        try { fs.unlinkSync(lockPath); } catch (_) {}
+      }
+    }
+  } catch (_) {}
+
+  // Proven Puppeteer flags (no --single-process to prevent Linux renderer deadlocks)
   const puppeteerOpts = {
     headless: true,
     args: [
@@ -64,13 +79,7 @@ const connect = async () => {
       "--disable-dev-shm-usage",
       "--disable-accelerated-2d-canvas",
       "--no-first-run",
-      "--disable-gpu",
-      "--single-process",
-      "--no-zygote",
-      "--disable-software-rasterizer",
-      "--disable-extensions",
-      "--disable-default-apps",
-      "--js-flags=--max-old-space-size=256"
+      "--disable-gpu"
     ],
   };
 
@@ -87,6 +96,7 @@ const connect = async () => {
       if (fs.existsSync(sp)) {
         puppeteerOpts.executablePath = sp;
         logger.info(`WhatsApp → Using system Chrome binary: ${sp}`);
+        recordLog(`Using system Chrome: ${sp}`);
         break;
       }
     }
@@ -102,27 +112,41 @@ const connect = async () => {
       if (chromeBrowser) {
         puppeteerOpts.executablePath = chromeBrowser.executablePath;
         logger.info(`WhatsApp → Found installed Chrome in cache: ${chromeBrowser.executablePath}`);
+        recordLog(`Found Chrome in cache: ${path.basename(chromeBrowser.executablePath)}`);
         if (process.platform !== 'win32') {
           try { fs.chmodSync(chromeBrowser.executablePath, 0o755); } catch (_) {}
         }
       } else {
         logger.info("WhatsApp → Chrome binary not in cache. Calling automated Chrome installer...");
+        initProgress = "Downloading Chrome binary (first run)...";
+        recordLog("Downloading Chrome binary for Linux...");
         const { ensureChrome } = require("../install-chrome");
         const exe = await ensureChrome();
         if (exe && fs.existsSync(exe)) {
           puppeteerOpts.executablePath = exe;
           logger.info(`WhatsApp → Installed Chrome and set executable: ${exe}`);
+          recordLog(`Installed Chrome at ${exe}`);
         }
       }
     } catch (err) {
       logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
+      recordLog(`Chrome locator note: ${err.message}`);
     }
   }
 
+  initProgress = "2/4: Initializing WhatsApp Web client...";
+  recordLog("Creating Client with LocalAuth...");
+
   client = new Client({
-    authStrategy: new LocalAuth({ dataPath: shortAuthPath }),
-    authTimeoutMs: 120000,
+    authStrategy: new LocalAuth({ dataPath: authDataPath }),
+    authTimeoutMs: 90000,
+    qrMaxRetries: 15,
     puppeteer: puppeteerOpts,
+    userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    webVersionCache: {
+      type: "remote",
+      remotePath: "https://raw.githubusercontent.com/wwebjs/web-whatsapp/main/dist/web-whatsapp.html"
+    }
   });
 
   // ── QR code ───────────────────────────────────────────────────────────────
@@ -187,9 +211,8 @@ const connect = async () => {
   });
 
   // ── Start ─────────────────────────────────────────────────────────────────
-  logger.info("WhatsApp → Starting browser session (this may take 15-30 seconds)…");
-  initProgress = "Starting Chromium browser session on Render...";
-  recordLog("Starting Chromium session...");
+  initProgress = "3/4: Loading web.whatsapp.com in Chromium...";
+  recordLog("Navigating to WhatsApp Web in Chromium...");
   try {
     await client.initialize();
   } catch (err) {
