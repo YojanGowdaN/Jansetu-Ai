@@ -162,6 +162,23 @@ app.listen(MAIN_PORT, '0.0.0.0', () => {
   console.log(`  ⚡ Central REST API:       http://localhost:${MAIN_PORT}/api/signals`);
   console.log(`  📋 Health Check Probe:    http://localhost:${MAIN_PORT}/health`);
   console.log('----------------------------------------------------------------');
+
+  // ─── Render Free Tier Keep-Alive (prevents auto-sleep after 15 min) ──────
+  if (IS_RENDER) {
+    const RENDER_URL = process.env.RENDER_EXTERNAL_URL || `https://jansetu-ai-gn4d.onrender.com`;
+    const KEEP_ALIVE_INTERVAL = 13 * 60 * 1000; // 13 minutes (before 15-min timeout)
+    setInterval(async () => {
+      try {
+        const res = await fetch(`${RENDER_URL}/health`);
+        const data = await res.json();
+        console.log(`[Keep-Alive] Ping OK — ${data.status} — ${new Date().toISOString()}`);
+      } catch (e) {
+        console.warn(`[Keep-Alive] Ping failed: ${e.message}`);
+      }
+    }, KEEP_ALIVE_INTERVAL);
+    console.log(`  🔄 Keep-Alive:            Self-ping every 13 min to prevent sleep`);
+    console.log('----------------------------------------------------------------');
+  }
 });
 
 // ─── Local Convenience Port Listeners (3000, 3001, 3002) ───────────────────
