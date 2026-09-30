@@ -13,7 +13,7 @@ const router          = express.Router();
 const fakeNewsService = require("../services/fakeNewsService");
 const alertService    = require("../services/alertService");
 const logger          = require("../utils/logger");
-const { getSocket, getStatus } = require("../bot/whatsapp");
+const { getClient, getStatus } = require("../bot/whatsapp");
 
 // Rate limit REST API: 30 requests per minute per IP
 const apiLimiter = rateLimit({

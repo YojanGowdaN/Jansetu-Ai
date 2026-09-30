@@ -54,33 +54,57 @@ const connect = async () => {
       "--no-first-run",
       "--disable-gpu",
       "--single-process",
-      "--no-zygote"
+      "--no-zygote",
+      "--disable-software-rasterizer",
+      "--disable-extensions",
+      "--disable-default-apps",
+      "--js-flags=--max-old-space-size=256"
     ],
   };
 
-  // Dynamically locate installed Chrome binary from Puppeteer cache
-  try {
-    const { getInstalledBrowsers } = require("@puppeteer/browsers");
-    const installed = await getInstalledBrowsers({ cacheDir });
-    const chromeBrowser = installed.find(b => b.browser === 'chrome' && fs.existsSync(b.executablePath));
-    
-    if (chromeBrowser) {
-      puppeteerOpts.executablePath = chromeBrowser.executablePath;
-      logger.info(`WhatsApp → Found installed Chrome in cache: ${chromeBrowser.executablePath}`);
-      if (process.platform !== 'win32') {
-        try { fs.chmodSync(chromeBrowser.executablePath, 0o755); } catch (_) {}
-      }
-    } else {
-      logger.info("WhatsApp → Chrome binary not in cache. Calling automated Chrome installer...");
-      const { ensureChrome } = require("../install-chrome");
-      const exe = await ensureChrome();
-      if (exe && fs.existsSync(exe)) {
-        puppeteerOpts.executablePath = exe;
-        logger.info(`WhatsApp → Installed Chrome and set executable: ${exe}`);
+  // 0. Check system-installed Chrome/Chromium on Linux
+  if (process.platform === 'linux') {
+    const systemPaths = [
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/snap/bin/chromium'
+    ];
+    for (const sp of systemPaths) {
+      if (fs.existsSync(sp)) {
+        puppeteerOpts.executablePath = sp;
+        logger.info(`WhatsApp → Using system Chrome binary: ${sp}`);
+        break;
       }
     }
-  } catch (err) {
-    logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
+  }
+
+  // 1. Locate installed Chrome binary from Puppeteer cache or install if missing
+  if (!puppeteerOpts.executablePath) {
+    try {
+      const { getInstalledBrowsers } = require("@puppeteer/browsers");
+      const installed = await getInstalledBrowsers({ cacheDir });
+      const chromeBrowser = installed.find(b => b.browser === 'chrome' && fs.existsSync(b.executablePath));
+      
+      if (chromeBrowser) {
+        puppeteerOpts.executablePath = chromeBrowser.executablePath;
+        logger.info(`WhatsApp → Found installed Chrome in cache: ${chromeBrowser.executablePath}`);
+        if (process.platform !== 'win32') {
+          try { fs.chmodSync(chromeBrowser.executablePath, 0o755); } catch (_) {}
+        }
+      } else {
+        logger.info("WhatsApp → Chrome binary not in cache. Calling automated Chrome installer...");
+        const { ensureChrome } = require("../install-chrome");
+        const exe = await ensureChrome();
+        if (exe && fs.existsSync(exe)) {
+          puppeteerOpts.executablePath = exe;
+          logger.info(`WhatsApp → Installed Chrome and set executable: ${exe}`);
+        }
+      }
+    } catch (err) {
+      logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
+    }
   }
 
   client = new Client({
