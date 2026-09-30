@@ -26,11 +26,23 @@ const recentChats = new Map(); // identifier -> Chat object
 let currentQr = null;
 let isReady = false;
 let connectedUser = null;
+let lastError = null;
+let initProgress = "Bot initializing...";
+const recentLogs = [];
+
+function recordLog(msg) {
+  const line = `[${new Date().toISOString().slice(11, 19)}] ${msg}`;
+  recentLogs.push(line);
+  if (recentLogs.length > 25) recentLogs.shift();
+}
 
 const getStatus = () => ({
   ready: isReady,
   qr: currentQr,
   user: connectedUser,
+  error: lastError,
+  progress: initProgress,
+  logs: recentLogs
 });
 
 const connect = async () => {
@@ -117,6 +129,9 @@ const connect = async () => {
   client.on("qr", (qr) => {
     currentQr = qr;
     isReady = false;
+    lastError = null;
+    initProgress = "QR Code ready! Scan with phone number 6361163002.";
+    recordLog("📱 QR Code generated! Available at /qr");
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     logger.info("  📱  SCAN THIS QR CODE WITH WHATSAPP");
     logger.info("  WhatsApp → ⋮ Menu → Linked Devices → Link a Device");
@@ -132,7 +147,10 @@ const connect = async () => {
   client.on("ready", () => {
     isReady = true;
     currentQr = null;
+    lastError = null;
     connectedUser = client.info?.pushname || "JanSetu Civic Bot";
+    initProgress = `Connected as ${connectedUser}!`;
+    recordLog(`✅ Connected as ${connectedUser}`);
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     logger.info(`  ✅ WhatsApp connected! (as ${connectedUser})`);
     logger.info("  🤖 Bot is online and receiving messages.");
@@ -141,13 +159,18 @@ const connect = async () => {
 
   // ── Auth failure ──────────────────────────────────────────────────────────
   client.on("auth_failure", (msg) => {
-    logger.error(`WhatsApp auth failed: ${msg}`);
-    logger.warn("Delete .wwebjs_auth/ folder and restart to re-scan QR.");
+    lastError = `WhatsApp auth failed: ${msg}`;
+    initProgress = lastError;
+    recordLog(`❌ ${lastError}`);
+    logger.error(lastError);
+    logger.warn("Delete session folder and restart to re-scan QR.");
   });
 
   // ── Disconnected ──────────────────────────────────────────────────────────
   let reconnecting = false;
   client.on("disconnected", (reason) => {
+    lastError = `Disconnected: ${reason}`;
+    recordLog(`⚠️ ${lastError}`);
     logger.warn(`WhatsApp disconnected: ${reason}. Reconnecting in 10s…`);
     if (reconnecting) return;
     reconnecting = true;
@@ -165,7 +188,16 @@ const connect = async () => {
 
   // ── Start ─────────────────────────────────────────────────────────────────
   logger.info("WhatsApp → Starting browser session (this may take 15-30 seconds)…");
-  await client.initialize();
+  initProgress = "Starting Chromium browser session on Render...";
+  recordLog("Starting Chromium session...");
+  try {
+    await client.initialize();
+  } catch (err) {
+    lastError = err.message;
+    initProgress = `Browser initialization error: ${err.message}`;
+    recordLog(`❌ Initialize error: ${err.message}`);
+    logger.error(`WhatsApp → Failed to initialize: ${err.message}`);
+  }
 };
 
 const { downloadAndDecryptMedia } = require("../utils/whatsappMediaDecryptor");

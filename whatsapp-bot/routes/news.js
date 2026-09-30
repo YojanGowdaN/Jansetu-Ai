@@ -86,6 +86,36 @@ const renderQrPage = (_req, res) => {
     `);
   }
 
+  if (status.error) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>WhatsApp Bot Error — JanSetu AI</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+      </head>
+      <body style="font-family:'Inter',sans-serif;background:#090D16;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:1rem;">
+        <div style="background:#0F172A;padding:2.25rem;border-radius:1.5rem;text-align:center;max-width:480px;width:100%;border:1px solid #EF4444;box-shadow:0 25px 50px -12px rgba(239,68,68,0.25);">
+          <div style="width:60px;height:60px;border-radius:50%;background:rgba(239,68,68,0.15);color:#EF4444;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 1.25rem;">⚠️</div>
+          <h2 style="margin:0 0 0.5rem 0;color:#EF4444;font-size:1.35rem;font-weight:700;">WhatsApp Startup Notice</h2>
+          <div style="background:#1E293B;padding:1rem;border-radius:0.75rem;text-align:left;color:#FCA5A5;font-size:0.8rem;font-family:monospace;word-break:break-all;margin:1rem 0;">
+            ${status.error}
+          </div>
+          <p style="color:#94A3B8;font-size:0.85rem;margin:0 0 1.5rem 0;">Stage: <b style="color:#F1F5F9;">${status.progress || 'Failed'}</b></p>
+          <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <a href="/restart-bot" style="padding:0.75rem 1.5rem;background:#F59E0B;color:#090D16;font-weight:700;border-radius:0.75rem;text-decoration:none;font-size:0.85rem;">🔄 Restart WhatsApp Client</a>
+            <a href="/qr" style="padding:0.75rem 1.5rem;background:#334155;color:#fff;font-weight:600;border-radius:0.75rem;text-decoration:none;font-size:0.85rem;">Refresh</a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  const logsHtml = (status.logs || []).slice(-4).map(l => `<div style="font-family:monospace;font-size:0.75rem;color:#94A3B8;text-align:left;">${l}</div>`).join('');
+
   return res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -97,10 +127,13 @@ const renderQrPage = (_req, res) => {
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     </head>
     <body style="font-family:'Inter',sans-serif;background:#090D16;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:1rem;">
-      <div style="background:#0F172A;padding:2.5rem;border-radius:1.5rem;text-align:center;max-width:420px;width:100%;border:1px solid #1E293B;">
-        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
-        <h2 style="margin:0 0 0.5rem 0;color:#F59E0B;font-size:1.35rem;">Initializing WhatsApp Bot...</h2>
-        <p style="color:#94A3B8;font-size:0.85rem;line-height:1.5;">Starting browser session on Render. The QR code will load right here within a few moments.</p>
+      <div style="background:#0F172A;padding:2.5rem;border-radius:1.5rem;text-align:center;max-width:440px;width:100%;border:1px solid #1E293B;">
+        <div style="font-size:2.8rem;margin-bottom:1rem;">⏳</div>
+        <h2 style="margin:0 0 0.5rem 0;color:#F59E0B;font-size:1.35rem;">Connecting WhatsApp Bot...</h2>
+        <p style="color:#E2E8F0;font-size:0.85rem;line-height:1.5;margin-bottom:1rem;"><b>Status:</b> ${status.progress || 'Starting browser session on Render...'}</p>
+        <div style="background:#1E293B;padding:0.75rem;border-radius:0.75rem;margin:1rem 0;">
+          ${logsHtml || '<div style="color:#64748B;font-size:0.75rem;">Initializing Chromium and WhatsApp Web...</div>'}
+        </div>
         <p style="color:#64748B;font-size:0.75rem;margin-top:1.5rem;">Checking status every 4 seconds...</p>
       </div>
     </body>
@@ -111,6 +144,21 @@ const renderQrPage = (_req, res) => {
 router.get("/qr", renderQrPage);
 router.get("/whatsapp-qr", renderQrPage);
 
+/* ── GET /restart-bot ─────────────────────────────────────────────────────── */
+router.get("/restart-bot", async (_req, res) => {
+  try {
+    const { connect, getClient } = require("../bot/whatsapp");
+    try {
+      const c = getClient();
+      if (c) await c.destroy();
+    } catch (_) {}
+    connect().catch(e => console.warn('Restart notice:', e.message));
+    res.redirect("/qr");
+  } catch (err) {
+    res.status(500).send(`Failed to restart: ${err.message}`);
+  }
+});
+
 /* ── GET /api/whatsapp-status ─────────────────────────────────────────────── */
 router.get("/api/whatsapp-status", (_req, res) => {
   const status = typeof getStatus === 'function' ? getStatus() : { ready: false, qr: null };
@@ -118,6 +166,9 @@ router.get("/api/whatsapp-status", (_req, res) => {
     connected: status.ready,
     hasQr: !!status.qr,
     connectedAs: status.user || null,
+    error: status.error || null,
+    progress: status.progress || null,
+    logs: status.logs || [],
     timestamp: new Date().toISOString()
   });
 });

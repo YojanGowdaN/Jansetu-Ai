@@ -82,11 +82,17 @@ app.get('/api/config', (_req, res) => {
   });
 });
 
-// ─── Direct WhatsApp Bot Endpoints on Main Server ───────────────────────────
-// Also proxies /send-otp, /notify-status, /notify-registered directly
+// ─── Direct WhatsApp Bot Integration on Unified Server ──────────────────────
+let waBot = null;
 try {
   const waRoutes = require('./whatsapp-bot/routes/news');
   app.use('/', waRoutes);
+
+  waBot = require('./whatsapp-bot/bot/whatsapp');
+  console.log('  🤖 Initializing Citizen WhatsApp Bot in Unified Server process...');
+  waBot.connect().catch((err) => {
+    console.warn('  ⚠️ [WhatsApp Bot Startup Notice]:', err.message);
+  });
 } catch (e) {
   console.warn('[WhatsApp Bot Routes] Mount notice:', e.message);
 }
@@ -191,47 +197,14 @@ if (!IS_RENDER) {
   }
 }
 
-// ─── Start WhatsApp Bot Sub-Process (Port 3001 + Baileys Client) ────────────
-let botProcess = null;
-
-function startWhatsAppBot() {
-  const botServerPath = path.join(__dirname, 'whatsapp-bot', 'server.js');
-  if (fs.existsSync(botServerPath)) {
-    try {
-      console.log('  🤖 Initializing Citizen WhatsApp Bot on Port 3001...');
-      botProcess = fork(botServerPath, [], {
-        cwd: path.join(__dirname, 'whatsapp-bot'),
-        env: {
-          ...process.env,
-          PORT: '3001',
-          SENTINEL_API_URL: `http://localhost:${MAIN_PORT}`
-        }
-      });
-
-      botProcess.on('error', (err) => {
-        console.warn('  ⚠️ [WhatsApp Bot Notice]:', err.message);
-      });
-
-      botProcess.on('exit', (code) => {
-        if (code !== 0 && code !== null) {
-          console.warn(`  ⚠️ [WhatsApp Bot] Process exited (code ${code}). Auto-restarting in 10s...`);
-          setTimeout(startWhatsAppBot, 10000);
-        }
-      });
-    } catch (err) {
-      console.warn('  ⚠️ [WhatsApp Bot Launch Notice]:', err.message);
-    }
-  }
-}
-
-// Start WhatsApp Bot in background
-startWhatsAppBot();
-
-// Graceful Shutdown
+// ─── Graceful Shutdown ──────────────────────────────────────────────────────
 function handleShutdown() {
   console.log('\n[JanSetu AI] Graceful shutdown initiated...');
-  if (botProcess) {
-    try { botProcess.kill('SIGTERM'); } catch (e) {}
+  if (waBot) {
+    try {
+      const c = waBot.getClient();
+      if (c) c.destroy();
+    } catch (e) {}
   }
   process.exit(0);
 }
