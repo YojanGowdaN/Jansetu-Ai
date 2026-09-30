@@ -1,38 +1,15 @@
 {
   "citizens": [
     {
-      "id": "CIT-001",
-      "name": "Demo Citizen",
-      "phone": "9876543210",
-      "email": "citizen@demo.com",
-      "password": "citizen123",
-      "district": "Mandya",
-      "city": "Halaguru",
-      "state": "Karnataka",
-      "role": "CITIZEN",
-      "created_at": "2026-01-01T00:00:00.000Z"
-    },
-    {
-      "name": "Karthik Raja",
-      "email": "karthik.test.1787750247612@example.com",
-      "phone": "9845012345",
-      "password": "password123",
-      "district": "Madurai",
-      "state": "Tamil Nadu",
-      "id": "CIT-002",
-      "role": "CITIZEN",
-      "created_at": "2026-08-26T13:17:27.716Z"
-    },
-    {
       "name": "Yojan Gowda N",
-      "email": "yojangowdan21@gmail.com",
+      "email": "ygn@gmail.com",
       "phone": "7019286524",
-      "password": "Yojangowda",
-      "district": "Mandya",
+      "password": "yojan@1234",
+      "district": "Mysuru",
       "state": "Karnataka",
-      "id": "CIT-003",
+      "id": "CIT-001",
       "role": "CITIZEN",
-      "created_at": "2026-08-26T14:26:06.793Z"
+      "created_at": "2026-09-29T15:11:28.888Z"
     }
   ],
   "authorities": [

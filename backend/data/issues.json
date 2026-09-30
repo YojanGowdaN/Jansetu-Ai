@@ -1,21 +1,21 @@
 [
   {
     "issue_id": "ISSUE-0001",
-    "title": "Road Infrastructure Development Hotspot — Halaguru (Mandya)",
+    "title": "Road Infrastructure Development Hotspot — Mandya",
     "category": "Road Infrastructure",
     "district": "Mandya",
     "state": "Karnataka",
     "stateCode": "29",
     "districtCode": "570",
-    "taluk_block": "Halaguru (Malavalli)",
-    "village_ward": "Halaguru Main Bazaar",
+    "taluk_block": "Mandya",
+    "village_ward": "Resolved Ward",
     "center_location": {
-      "lat": 12.3551,
-      "lng": 77.2142
+      "lat": 12.306735,
+      "lng": 76.6205366
     },
-    "signal_count": 11,
-    "population_affected": 95000,
-    "deprivation_score": 0.42,
+    "signal_count": 1,
+    "population_affected": 50000,
+    "deprivation_score": 0.5,
     "niti_evidence": {
       "value": 0.5,
       "source": "Prototype / Demonstration Dataset",
@@ -23,13 +23,13 @@
       "period": "N/A",
       "normalized": true
     },
-    "priority_score": 40.8,
+    "priority_score": 40.7,
     "score_breakdown": {
       "citizen_demand": {
-        "raw_val": "11 signals",
+        "raw_val": "1 signals",
         "normalized_val": 0,
         "weight_pct": 30,
-        "weighted_score": 0.1
+        "weighted_score": 0
       },
       "population_affected": {
         "raw_val": "50,000 people",
@@ -69,285 +69,19 @@
         "weight_pct": 5,
         "weighted_score": 4.4
       },
-      "total_score": 40.8,
-      "formula_explanation_str": "Citizen Demand: 11 signals -> 0 x 30% = 0.1 | Population: 50,000 people -> 0.25 x 20% = 5 | Infra Gap: Deprivation Index 0.50 -> 0.5 x 20% = 10 [Prototype / Demonstration Dataset] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 40.8 / 100"
-    },
-    "severity": "Medium",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-75317",
-      "JS-2026-42987",
-      "JS-2026-89587",
-      "JS-2026-35821",
-      "JS-2026-62623",
-      "JS-2026-59694",
-      "JS-2026-65544",
-      "JS-2026-94240",
-      "JS-2026-71661",
-      "JS-2026-96396",
-      "JS-2026-24370"
-    ],
-    "created_at": "2026-08-23T06:07:54.973Z",
-    "updated_at": "2026-08-26T12:32:56.895Z"
-  },
-  {
-    "issue_id": "ISSUE-0002",
-    "title": "Other Development Hotspot — Yadgir",
-    "category": "Other",
-    "district": "Yadgir",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "586",
-    "taluk_block": "Shahapur",
-    "village_ward": "Community Sector",
-    "center_location": {
-      "lat": 16.77,
-      "lng": 76.82
-    },
-    "signal_count": 6,
-    "population_affected": 184000,
-    "deprivation_score": 0.71,
-    "niti_evidence": {
-      "value": 0.71,
-      "source": "NITI Aayog (Cached)",
-      "indicator": "Composite Deprivation Index",
-      "dataset": "Champions of Change — Aspirational Districts",
-      "period": "2024-25",
-      "normalized": true
-    },
-    "priority_score": 52.4,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "6 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0.1
-      },
-      "population_affected": {
-        "raw_val": "184,000 people",
-        "normalized_val": 0.92,
-        "weight_pct": 20,
-        "weighted_score": 18.4
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.71",
-        "normalized_val": 0.71,
-        "weight_pct": 20,
-        "weighted_score": 14.2,
-        "source_attribution": {
-          "value": 0.71,
-          "source": "NITI Aayog (Cached)",
-          "indicator": "Composite Deprivation Index",
-          "period": "2024-25",
-          "dataset": "Champions of Change — Aspirational Districts",
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "Medium",
-        "normalized_val": 0.6,
-        "weight_pct": 15,
-        "weighted_score": 9
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 52.4,
-      "formula_explanation_str": "Citizen Demand: 6 signals -> 0 x 30% = 0.1 | Population: 184,000 people -> 0.92 x 20% = 18.4 | Infra Gap: Deprivation Index 0.71 -> 0.71 x 20% = 14.2 [NITI Aayog (Cached)] | Severity: Medium -> 0.6 x 15% = 9 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 52.4 / 100"
-    },
-    "severity": "Medium",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-23571",
-      "JS-2026-85851",
-      "JS-2026-39328",
-      "JS-2026-41582",
-      "JS-2026-14696",
-      "JS-2026-51892"
-    ],
-    "created_at": "2026-08-23T13:51:34.711Z",
-    "updated_at": "2026-08-26T09:40:05.554Z"
-  },
-  {
-    "issue_id": "ISSUE-0003",
-    "title": "Healthcare Development Hotspot — Yadgir",
-    "category": "Healthcare",
-    "district": "Yadgir",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "586",
-    "taluk_block": "Shahapur",
-    "village_ward": "Community Sector",
-    "center_location": {
-      "lat": 16.77,
-      "lng": 76.82
-    },
-    "signal_count": 6,
-    "population_affected": 184000,
-    "deprivation_score": 0.71,
-    "niti_evidence": {
-      "value": 0.71,
-      "source": "NITI Aayog (Cached)",
-      "indicator": "Composite Deprivation Index",
-      "dataset": "Champions of Change — Aspirational Districts",
-      "period": "2024-25",
-      "normalized": true
-    },
-    "priority_score": 58.4,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "6 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0.1
-      },
-      "population_affected": {
-        "raw_val": "184,000 people",
-        "normalized_val": 0.92,
-        "weight_pct": 20,
-        "weighted_score": 18.4
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.71",
-        "normalized_val": 0.71,
-        "weight_pct": 20,
-        "weighted_score": 14.2,
-        "source_attribution": {
-          "value": 0.71,
-          "source": "NITI Aayog (Cached)",
-          "indicator": "Composite Deprivation Index",
-          "period": "2024-25",
-          "dataset": "Champions of Change — Aspirational Districts",
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "High",
-        "normalized_val": 1,
-        "weight_pct": 15,
-        "weighted_score": 15
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 58.4,
-      "formula_explanation_str": "Citizen Demand: 6 signals -> 0 x 30% = 0.1 | Population: 184,000 people -> 0.92 x 20% = 18.4 | Infra Gap: Deprivation Index 0.71 -> 0.71 x 20% = 14.2 [NITI Aayog (Cached)] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 58.4 / 100"
+      "total_score": 40.7,
+      "formula_explanation_str": "Citizen Demand: 1 signals -> 0 x 30% = 0 | Population: 50,000 people -> 0.25 x 20% = 5 | Infra Gap: Deprivation Index 0.50 -> 0.5 x 20% = 10 [Prototype / Demonstration Dataset] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 40.7 / 100"
     },
     "severity": "High",
     "status": "IDENTIFIED",
     "signals_list": [
-      "JS-2026-60241",
-      "JS-2026-61117",
-      "JS-2026-14240",
-      "JS-2026-41112",
-      "JS-2026-59044",
-      "JS-2026-54104"
+      "JS-2026-63290"
     ],
-    "created_at": "2026-08-23T13:58:05.980Z",
-    "updated_at": "2026-08-26T10:23:30.309Z"
+    "created_at": "2026-09-29T14:43:13.367Z",
+    "updated_at": "2026-09-29T14:43:13.367Z"
   },
   {
-    "issue_id": "ISSUE-0004",
-    "title": "Education Development Hotspot — Yadgir",
-    "category": "Education",
-    "district": "Yadgir",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "586",
-    "taluk_block": "Shahapur",
-    "village_ward": "Community Sector",
-    "center_location": {
-      "lat": 16.77,
-      "lng": 76.82
-    },
-    "signal_count": 1,
-    "population_affected": 184000,
-    "deprivation_score": 0.71,
-    "niti_evidence": {
-      "value": 0.71,
-      "source": "NITI Aayog (Cached)",
-      "indicator": "Composite Deprivation Index",
-      "dataset": "Champions of Change — Aspirational Districts",
-      "period": "2024-25",
-      "normalized": true
-    },
-    "priority_score": 52.3,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "1 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0
-      },
-      "population_affected": {
-        "raw_val": "184,000 people",
-        "normalized_val": 0.92,
-        "weight_pct": 20,
-        "weighted_score": 18.4
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.71",
-        "normalized_val": 0.71,
-        "weight_pct": 20,
-        "weighted_score": 14.2,
-        "source_attribution": {
-          "value": 0.71,
-          "source": "NITI Aayog (Cached)",
-          "indicator": "Composite Deprivation Index",
-          "period": "2024-25",
-          "dataset": "Champions of Change — Aspirational Districts",
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "Medium",
-        "normalized_val": 0.6,
-        "weight_pct": 15,
-        "weighted_score": 9
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 52.3,
-      "formula_explanation_str": "Citizen Demand: 1 signals -> 0 x 30% = 0 | Population: 184,000 people -> 0.92 x 20% = 18.4 | Infra Gap: Deprivation Index 0.71 -> 0.71 x 20% = 14.2 [NITI Aayog (Cached)] | Severity: Medium -> 0.6 x 15% = 9 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 52.3 / 100"
-    },
-    "severity": "Medium",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-65528"
-    ],
-    "created_at": "2026-08-23T14:10:24.325Z",
-    "updated_at": "2026-08-23T14:10:24.325Z"
-  },
-  {
-    "issue_id": "ISSUE-0005",
+    "issue_id": "ISSUE-0002",
     "title": "Road Infrastructure Development Hotspot — Yadgir",
     "category": "Road Infrastructure",
     "district": "Yadgir",
@@ -355,105 +89,10 @@
     "stateCode": "29",
     "districtCode": "586",
     "taluk_block": "Shahapur",
-    "village_ward": "Community Sector",
+    "village_ward": "Ward 04, Central Market",
     "center_location": {
-      "lat": 16.77,
-      "lng": 76.82
-    },
-    "signal_count": 14,
-    "population_affected": 184000,
-    "deprivation_score": 0.71,
-    "niti_evidence": {
-      "value": 0.71,
-      "source": "NITI Aayog (Cached)",
-      "indicator": "Composite Deprivation Index",
-      "dataset": "Champions of Change — Aspirational Districts",
-      "period": "2024-25",
-      "normalized": true
-    },
-    "priority_score": 58.4,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "14 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0.1
-      },
-      "population_affected": {
-        "raw_val": "184,000 people",
-        "normalized_val": 0.92,
-        "weight_pct": 20,
-        "weighted_score": 18.4
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.71",
-        "normalized_val": 0.71,
-        "weight_pct": 20,
-        "weighted_score": 14.2,
-        "source_attribution": {
-          "value": 0.71,
-          "source": "NITI Aayog (Cached)",
-          "indicator": "Composite Deprivation Index",
-          "period": "2024-25",
-          "dataset": "Champions of Change — Aspirational Districts",
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "High",
-        "normalized_val": 1,
-        "weight_pct": 15,
-        "weighted_score": 15
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 58.4,
-      "formula_explanation_str": "Citizen Demand: 14 signals -> 0 x 30% = 0.1 | Population: 184,000 people -> 0.92 x 20% = 18.4 | Infra Gap: Deprivation Index 0.71 -> 0.71 x 20% = 14.2 [NITI Aayog (Cached)] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 58.4 / 100"
-    },
-    "severity": "High",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-77706",
-      "JS-2026-46663",
-      "JS-2026-69984",
-      "JS-2026-33592",
-      "JS-2026-91786",
-      "JS-2026-40236",
-      "JS-2026-50152",
-      "JS-2026-10574",
-      "JS-2026-78355",
-      "JS-2026-97594",
-      "JS-2026-44359",
-      "JS-2026-95790",
-      "JS-2026-29853",
-      "JS-2026-53230"
-    ],
-    "created_at": "2026-08-23T14:15:34.443Z",
-    "updated_at": "2026-08-26T10:51:20.567Z"
-  },
-  {
-    "issue_id": "ISSUE-0006",
-    "title": "Streetlights Development Hotspot — Yadgir",
-    "category": "Streetlights",
-    "district": "Yadgir",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "586",
-    "taluk_block": "Shahapur",
-    "village_ward": "Community Sector",
-    "center_location": {
-      "lat": 16.77,
-      "lng": 76.82
+      "lat": 12.306706112357384,
+      "lng": 76.62052782082374
     },
     "signal_count": 1,
     "population_affected": 184000,
@@ -466,7 +105,7 @@
       "period": "2024-25",
       "normalized": true
     },
-    "priority_score": 47.8,
+    "priority_score": 58.3,
     "score_breakdown": {
       "citizen_demand": {
         "raw_val": "1 signals",
@@ -495,87 +134,6 @@
         }
       },
       "severity": {
-        "raw_val": "Low",
-        "normalized_val": 0.3,
-        "weight_pct": 15,
-        "weighted_score": 4.5
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 47.8,
-      "formula_explanation_str": "Citizen Demand: 1 signals -> 0 x 30% = 0 | Population: 184,000 people -> 0.92 x 20% = 18.4 | Infra Gap: Deprivation Index 0.71 -> 0.71 x 20% = 14.2 [NITI Aayog (Cached)] | Severity: Low -> 0.3 x 15% = 4.5 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 47.8 / 100"
-    },
-    "severity": "Low",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-28252"
-    ],
-    "created_at": "2026-08-23T14:38:34.848Z",
-    "updated_at": "2026-08-23T14:38:34.848Z"
-  },
-  {
-    "issue_id": "ISSUE-0007",
-    "title": "Water Development Hotspot — Mandya",
-    "category": "Water",
-    "district": "Mandya",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "570",
-    "taluk_block": "Halaguru",
-    "village_ward": "Resolved Ward",
-    "center_location": {
-      "lat": 12.4285115,
-      "lng": 77.2367285
-    },
-    "signal_count": 2,
-    "population_affected": 50000,
-    "deprivation_score": 0.5,
-    "niti_evidence": {
-      "value": 0.5,
-      "source": "Prototype / Demonstration Dataset",
-      "indicator": "Deprivation Score (Hardcoded Fallback)",
-      "period": "N/A",
-      "normalized": true
-    },
-    "priority_score": 40.7,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "2 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0
-      },
-      "population_affected": {
-        "raw_val": "50,000 people",
-        "normalized_val": 0.25,
-        "weight_pct": 20,
-        "weighted_score": 5
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.50",
-        "normalized_val": 0.5,
-        "weight_pct": 20,
-        "weighted_score": 10,
-        "source_attribution": {
-          "value": 0.5,
-          "source": "Prototype / Demonstration Dataset",
-          "indicator": "Deprivation Score (Hardcoded Fallback)",
-          "period": "N/A",
-          "dataset": null,
-          "normalized": true
-        }
-      },
-      "severity": {
         "raw_val": "High",
         "normalized_val": 1,
         "weight_pct": 15,
@@ -593,264 +151,15 @@
         "weight_pct": 5,
         "weighted_score": 4.4
       },
-      "total_score": 40.7,
-      "formula_explanation_str": "Citizen Demand: 2 signals -> 0 x 30% = 0 | Population: 50,000 people -> 0.25 x 20% = 5 | Infra Gap: Deprivation Index 0.50 -> 0.5 x 20% = 10 [Prototype / Demonstration Dataset] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 40.7 / 100"
+      "total_score": 58.3,
+      "formula_explanation_str": "Citizen Demand: 1 signals -> 0 x 30% = 0 | Population: 184,000 people -> 0.92 x 20% = 18.4 | Infra Gap: Deprivation Index 0.71 -> 0.71 x 20% = 14.2 [NITI Aayog (Cached)] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 58.3 / 100"
     },
     "severity": "High",
     "status": "IDENTIFIED",
     "signals_list": [
-      "JS-2026-98315",
-      "JS-2026-16458"
+      "JS-2026-38569"
     ],
-    "created_at": "2026-08-26T11:15:06.664Z",
-    "updated_at": "2026-08-26T13:42:27.533Z"
-  },
-  {
-    "issue_id": "ISSUE-0008",
-    "title": "Other Development Hotspot — Mandya",
-    "category": "Other",
-    "district": "Mandya",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "570",
-    "taluk_block": "Halaguru",
-    "village_ward": "Resolved Ward",
-    "center_location": {
-      "lat": 12.4285102,
-      "lng": 77.2367273
-    },
-    "signal_count": 4,
-    "population_affected": 50000,
-    "deprivation_score": 0.5,
-    "niti_evidence": {
-      "value": 0.5,
-      "source": "Prototype / Demonstration Dataset",
-      "indicator": "Deprivation Score (Hardcoded Fallback)",
-      "period": "N/A",
-      "normalized": true
-    },
-    "priority_score": 34.7,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "4 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0
-      },
-      "population_affected": {
-        "raw_val": "50,000 people",
-        "normalized_val": 0.25,
-        "weight_pct": 20,
-        "weighted_score": 5
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.50",
-        "normalized_val": 0.5,
-        "weight_pct": 20,
-        "weighted_score": 10,
-        "source_attribution": {
-          "value": 0.5,
-          "source": "Prototype / Demonstration Dataset",
-          "indicator": "Deprivation Score (Hardcoded Fallback)",
-          "period": "N/A",
-          "dataset": null,
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "Medium",
-        "normalized_val": 0.6,
-        "weight_pct": 15,
-        "weighted_score": 9
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 34.7,
-      "formula_explanation_str": "Citizen Demand: 4 signals -> 0 x 30% = 0 | Population: 50,000 people -> 0.25 x 20% = 5 | Infra Gap: Deprivation Index 0.50 -> 0.5 x 20% = 10 [Prototype / Demonstration Dataset] | Severity: Medium -> 0.6 x 15% = 9 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 34.7 / 100"
-    },
-    "severity": "Medium",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-20689",
-      "JS-2026-63426",
-      "JS-2026-23689",
-      "JS-2026-19277"
-    ],
-    "created_at": "2026-08-26T11:16:49.830Z",
-    "updated_at": "2026-08-26T12:17:31.597Z"
-  },
-  {
-    "issue_id": "ISSUE-0009",
-    "title": "Healthcare Development Hotspot — Mandya",
-    "category": "Healthcare",
-    "district": "Mandya",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "570",
-    "taluk_block": "Halaguru",
-    "village_ward": "Resolved Ward",
-    "center_location": {
-      "lat": 12.3551,
-      "lng": 77.2142
-    },
-    "signal_count": 2,
-    "population_affected": 50000,
-    "deprivation_score": 0.5,
-    "niti_evidence": {
-      "value": 0.5,
-      "source": "Prototype / Demonstration Dataset",
-      "indicator": "Deprivation Score (Hardcoded Fallback)",
-      "period": "N/A",
-      "normalized": true
-    },
-    "priority_score": 40.7,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "2 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0
-      },
-      "population_affected": {
-        "raw_val": "50,000 people",
-        "normalized_val": 0.25,
-        "weight_pct": 20,
-        "weighted_score": 5
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.50",
-        "normalized_val": 0.5,
-        "weight_pct": 20,
-        "weighted_score": 10,
-        "source_attribution": {
-          "value": 0.5,
-          "source": "Prototype / Demonstration Dataset",
-          "indicator": "Deprivation Score (Hardcoded Fallback)",
-          "period": "N/A",
-          "dataset": null,
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "High",
-        "normalized_val": 1,
-        "weight_pct": 15,
-        "weighted_score": 15
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 40.7,
-      "formula_explanation_str": "Citizen Demand: 2 signals -> 0 x 30% = 0 | Population: 50,000 people -> 0.25 x 20% = 5 | Infra Gap: Deprivation Index 0.50 -> 0.5 x 20% = 10 [Prototype / Demonstration Dataset] | Severity: High -> 1 x 15% = 15 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 40.7 / 100"
-    },
-    "severity": "High",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-27424",
-      "JS-2026-76834"
-    ],
-    "created_at": "2026-08-26T11:20:36.976Z",
-    "updated_at": "2026-08-26T12:29:21.388Z"
-  },
-  {
-    "issue_id": "ISSUE-0010",
-    "title": "Streetlights Development Hotspot — Mandya",
-    "category": "Streetlights",
-    "district": "Mandya",
-    "state": "Karnataka",
-    "stateCode": "29",
-    "districtCode": "570",
-    "taluk_block": "Halaguru",
-    "village_ward": "Resolved Ward",
-    "center_location": {
-      "lat": 12.3551,
-      "lng": 77.2142
-    },
-    "signal_count": 2,
-    "population_affected": 50000,
-    "deprivation_score": 0.5,
-    "niti_evidence": {
-      "value": 0.5,
-      "source": "Prototype / Demonstration Dataset",
-      "indicator": "Deprivation Score (Hardcoded Fallback)",
-      "period": "N/A",
-      "normalized": true
-    },
-    "priority_score": 30.2,
-    "score_breakdown": {
-      "citizen_demand": {
-        "raw_val": "2 signals",
-        "normalized_val": 0,
-        "weight_pct": 30,
-        "weighted_score": 0
-      },
-      "population_affected": {
-        "raw_val": "50,000 people",
-        "normalized_val": 0.25,
-        "weight_pct": 20,
-        "weighted_score": 5
-      },
-      "infrastructure_gap": {
-        "raw_val": "Deprivation Index 0.50",
-        "normalized_val": 0.5,
-        "weight_pct": 20,
-        "weighted_score": 10,
-        "source_attribution": {
-          "value": 0.5,
-          "source": "Prototype / Demonstration Dataset",
-          "indicator": "Deprivation Score (Hardcoded Fallback)",
-          "period": "N/A",
-          "dataset": null,
-          "normalized": true
-        }
-      },
-      "severity": {
-        "raw_val": "Low",
-        "normalized_val": 0.3,
-        "weight_pct": 15,
-        "weighted_score": 4.5
-      },
-      "urgency_trend": {
-        "raw_val": "+25% signals in 60d",
-        "normalized_val": 0.63,
-        "weight_pct": 10,
-        "weighted_score": 6.3
-      },
-      "evidence_confidence": {
-        "raw_val": "88% evidence confidence",
-        "normalized_val": 0.88,
-        "weight_pct": 5,
-        "weighted_score": 4.4
-      },
-      "total_score": 30.2,
-      "formula_explanation_str": "Citizen Demand: 2 signals -> 0 x 30% = 0 | Population: 50,000 people -> 0.25 x 20% = 5 | Infra Gap: Deprivation Index 0.50 -> 0.5 x 20% = 10 [Prototype / Demonstration Dataset] | Severity: Low -> 0.3 x 15% = 4.5 | Urgency: +25% signals in 60d -> 0.63 x 10% = 6.3 | Evidence: 88% evidence confidence -> 0.88 x 5% = 4.4 => TOTAL = 30.2 / 100"
-    },
-    "severity": "High",
-    "status": "IDENTIFIED",
-    "signals_list": [
-      "JS-2026-26923",
-      "JS-2026-39072"
-    ],
-    "created_at": "2026-08-26T11:48:02.080Z",
-    "updated_at": "2026-08-26T12:09:34.083Z"
+    "created_at": "2026-09-29T15:12:57.877Z",
+    "updated_at": "2026-09-29T15:12:57.877Z"
   }
 ]
