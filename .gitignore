@@ -1,2 +1,29 @@
-/.env
-/.env.example
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
+backend/.env
+whatsapp-bot/.env
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Puppeteer browser cache
+.cache/
+.puppeteer/
+
+# WhatsApp session auth
+.wwebjs_auth/
+.wwebjs_cache/
+auth_info_baileys/
+.jansetu-wa/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db

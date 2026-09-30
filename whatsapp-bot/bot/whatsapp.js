@@ -51,12 +51,18 @@ const connect = async () => {
   // Dynamically locate installed Chrome binary from Puppeteer
   try {
     const puppeteer = require("puppeteer");
-    const exe = puppeteer.executablePath();
+    let exe = null;
+    try { exe = puppeteer.executablePath(); } catch (_) {}
+    if (!exe || !fs.existsSync(exe)) {
+      logger.info("WhatsApp → Chrome binary not found in cache. Calling automated Chrome installer...");
+      const { ensureChrome } = require("../install-chrome");
+      exe = await ensureChrome();
+    }
     if (exe && fs.existsSync(exe)) {
       puppeteerOpts.executablePath = exe;
-      logger.info(`WhatsApp → Found Chrome binary at: ${exe}`);
+      logger.info(`WhatsApp → Using Chrome binary at: ${exe}`);
     } else {
-      logger.info("WhatsApp → Looking for Chrome in project cache directory: " + cacheDir);
+      logger.info("WhatsApp → Using default Puppeteer locator in: " + cacheDir);
     }
   } catch (err) {
     logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
