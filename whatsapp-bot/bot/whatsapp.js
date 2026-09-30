@@ -74,11 +74,24 @@ const connect = async () => {
     puppeteer: puppeteerOpts,
   });
 
+let currentQr = null;
+let isReady = false;
+let connectedUser = null;
+
+const getStatus = () => ({
+  ready: isReady,
+  qr: currentQr,
+  user: connectedUser,
+});
+
   // ── QR code ───────────────────────────────────────────────────────────────
   client.on("qr", (qr) => {
+    currentQr = qr;
+    isReady = false;
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     logger.info("  📱  SCAN THIS QR CODE WITH WHATSAPP");
     logger.info("  WhatsApp → ⋮ Menu → Linked Devices → Link a Device");
+    logger.info("  🌐 Or view QR in browser: /qr");
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     qrcode.generate(qr, { small: true });
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -88,8 +101,11 @@ const connect = async () => {
 
   // ── Ready ─────────────────────────────────────────────────────────────────
   client.on("ready", () => {
+    isReady = true;
+    currentQr = null;
+    connectedUser = client.info?.pushname || "JanSetu Civic Bot";
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    logger.info(`  ✅ WhatsApp connected! (as ${client.info?.pushname || "Sentinel Bot"})`);
+    logger.info(`  ✅ WhatsApp connected! (as ${connectedUser})`);
     logger.info("  🤖 Bot is online and receiving messages.");
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   });
@@ -457,4 +473,4 @@ const sendWhatsAppNotification = async (target, content) => {
   return false;
 };
 
-module.exports = { connect, getClient, sendWhatsAppNotification };
+module.exports = { connect, getClient, sendWhatsAppNotification, getStatus };

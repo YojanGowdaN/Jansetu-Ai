@@ -13,7 +13,7 @@ const router          = express.Router();
 const fakeNewsService = require("../services/fakeNewsService");
 const alertService    = require("../services/alertService");
 const logger          = require("../utils/logger");
-const { getSocket }   = require("../bot/whatsapp");
+const { getSocket, getStatus } = require("../bot/whatsapp");
 
 // Rate limit REST API: 30 requests per minute per IP
 const apiLimiter = rateLimit({
@@ -22,16 +22,116 @@ const apiLimiter = rateLimit({
   message:  { error: "Too many requests. Please slow down." },
 });
 
+/* ── GET /qr & /whatsapp-qr — Visual Web QR Code Scanner ──────────────────── */
+const renderQrPage = (_req, res) => {
+  const status = typeof getStatus === 'function' ? getStatus() : { ready: false, qr: null };
+
+  if (status.ready) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>WhatsApp Bot Online — JanSetu AI</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+      </head>
+      <body style="font-family:'Inter',sans-serif;background:#090D16;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:1rem;">
+        <div style="background:#0F172A;padding:2.5rem;border-radius:1.5rem;text-align:center;max-width:420px;width:100%;border:1px solid #1E293B;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+          <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.15);color:#10B981;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1.25rem;">✓</div>
+          <h2 style="margin:0 0 0.5rem 0;color:#10B981;font-size:1.5rem;font-weight:700;">WhatsApp Bot Connected!</h2>
+          <p style="color:#94A3B8;font-size:0.9rem;margin:0 0 1.5rem 0;">Active as <b style="color:#F8FAFC;">${status.user || 'JanSetu Civic Bot'}</b></p>
+          <div style="padding:1rem;background:#1E293B;border-radius:1rem;border:1px solid #334155;text-align:left;font-size:0.8rem;color:#CBD5E1;line-height:1.6;">
+            <div>🤖 <b>Auto-reply:</b> Active for citizen civic reports</div>
+            <div>📍 <b>Location & Audio:</b> Voice transcripts & triage live</div>
+            <div>📱 <b>Direct alerts:</b> Operating normally</div>
+          </div>
+          <div style="margin-top:1.5rem;">
+            <a href="/" style="display:inline-block;padding:0.75rem 1.5rem;background:#F59E0B;color:#090D16;font-weight:700;border-radius:0.75rem;text-decoration:none;font-size:0.85rem;">Go to Citizen Portal</a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  if (status.qr) {
+    const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(status.qr)}`;
+    return res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="refresh" content="5">
+        <title>Scan WhatsApp QR — JanSetu AI</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+      </head>
+      <body style="font-family:'Inter',sans-serif;background:#090D16;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:1rem;">
+        <div style="background:#0F172A;padding:2.25rem;border-radius:1.5rem;text-align:center;max-width:440px;width:100%;border:1px solid #1E293B;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+          <div style="display:inline-block;padding:0.25rem 0.75rem;border-radius:9999px;background:rgba(245,158,11,0.15);color:#F59E0B;font-size:0.75rem;font-weight:700;margin-bottom:0.75rem;">JANSETU AI &bull; WHATSAPP SETUP</div>
+          <h2 style="margin:0 0 0.5rem 0;color:#FFFFFF;font-size:1.4rem;font-weight:700;">Link WhatsApp Device</h2>
+          <p style="color:#94A3B8;font-size:0.85rem;margin:0 0 1.25rem 0;line-height:1.5;">
+            Open WhatsApp on phone &rarr; <b>Menu (⋮)</b> or <b>Settings</b> &rarr; <b>Linked Devices</b> &rarr; <b>Link a Device</b>
+          </p>
+          <div style="background:#FFFFFF;padding:1rem;border-radius:1.25rem;display:inline-block;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3);">
+            <img src="${qrImg}" alt="WhatsApp QR Code" style="display:block;width:280px;height:280px;border-radius:0.5rem;" />
+          </div>
+          <p style="color:#64748B;font-size:0.75rem;margin:1.25rem 0 0 0;">
+            🔄 Refreshes automatically every 5 seconds.
+          </p>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  return res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="refresh" content="4">
+      <title>Connecting WhatsApp — JanSetu AI</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    </head>
+    <body style="font-family:'Inter',sans-serif;background:#090D16;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:1rem;">
+      <div style="background:#0F172A;padding:2.5rem;border-radius:1.5rem;text-align:center;max-width:420px;width:100%;border:1px solid #1E293B;">
+        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+        <h2 style="margin:0 0 0.5rem 0;color:#F59E0B;font-size:1.35rem;">Initializing WhatsApp Bot...</h2>
+        <p style="color:#94A3B8;font-size:0.85rem;line-height:1.5;">Starting browser session on Render. The QR code will load right here within a few moments.</p>
+        <p style="color:#64748B;font-size:0.75rem;margin-top:1.5rem;">Checking status every 4 seconds...</p>
+      </div>
+    </body>
+    </html>
+  `);
+};
+
+router.get("/qr", renderQrPage);
+router.get("/whatsapp-qr", renderQrPage);
+
+/* ── GET /api/whatsapp-status ─────────────────────────────────────────────── */
+router.get("/api/whatsapp-status", (_req, res) => {
+  const status = typeof getStatus === 'function' ? getStatus() : { ready: false, qr: null };
+  res.json({
+    connected: status.ready,
+    hasQr: !!status.qr,
+    connectedAs: status.user || null,
+    timestamp: new Date().toISOString()
+  });
+});
+
 /* ── GET /health ──────────────────────────────────────────────────────────── */
 router.get("/health", (_req, res) => {
-  const socket     = getSocket();
-  const waStatus   = socket?.user ? "connected" : "disconnected";
+  const status   = typeof getStatus === 'function' ? getStatus() : { ready: false };
+  const waStatus = status.ready ? "connected" : "disconnected";
 
   res.json({
     status:      "ok",
     service:     "Sentinel WhatsApp Bot",
     whatsapp:    waStatus,
-    connectedAs: socket?.user?.id || null,
+    connectedAs: status.user || null,
     timestamp:   new Date().toISOString(),
   });
 });
