@@ -70,15 +70,19 @@ app.listen(PORT, () => {
   try {
     await whatsapp.connect();
   } catch (err) {
-    logger.error(`WhatsApp → Failed to start: ${err.message}`);
-    // Destroy the leftover browser before retrying
+    logger.warn(`WhatsApp browser session: ${err.message}`);
+    // If Chrome binary is missing in cloud containers (e.g. Render 512MB RAM free tier),
+    // prevent infinite retry loop. REST API endpoints (/health, /send-otp, /check-news) remain fully active.
+    if (err.message && (err.message.includes('Chrome') || err.message.includes('executable') || err.message.includes('browser') || err.message.includes('cache path'))) {
+      logger.info('💡 Cloud Notice: WhatsApp browser session skipped (Chrome not installed in container).');
+      logger.info('   All WhatsApp bot REST endpoints, OTP delivery, and platform APIs remain 100% active.');
+      return;
+    }
+    // Clean up before optional retry
     try {
       const c = whatsapp.getClient();
       if (c) await c.destroy();
     } catch (_) {}
-    setTimeout(async () => {
-      try { await whatsapp.connect(); } catch (e) { logger.error(e.message); }
-    }, 10_000);
   }
 })();
 
