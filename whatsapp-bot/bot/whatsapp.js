@@ -1,34 +1,21 @@
-/**
- * bot/whatsapp.js
- * WhatsApp connection using whatsapp-web.js (Puppeteer-based).
- *
- * Features:
- *  - QR code printed to terminal on first run — scan once with your phone
- *  - Session saved to ./.wwebjs_auth/ (persists across restarts — no re-scan needed)
- *  - Auto-reconnect if the connection drops
- *  - Handles text, URL, and image caption messages
- *  - Per-sender rate limiting
- *  - Fake news analysis + formatted reply with emojis
- *  - Auto-alerts authority when confidence > threshold
- */
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, downloadMediaMessage } = require('@whiskeysockets/baileys');
+const pino = require('pino');
+const qrcode = require('qrcode-terminal');
+const { Boom } = require('@hapi/boom');
+const path = require('path');
+const fs = require('fs');
+const logger = require('../utils/logger');
+const rateLimiter = require('../utils/rateLimiter');
+const { geminiBotService } = require('../services/geminiBotService');
 
-const qrcode          = require("qrcode-terminal");
-const logger          = require("../utils/logger");
-const rateLimiter     = require("../utils/rateLimiter");
-const { extractUrls, getMessageType } = require("../utils/urlDetector");
-const fakeNewsService = require("../services/fakeNewsService");
-const alertService    = require("../services/alertService");
-const { geminiBotService } = require("../services/geminiBotService");
-
-let client = null;
-const recentChats = new Map(); // identifier -> Chat object
-
+let sock = null;
 let currentQr = null;
 let isReady = false;
 let connectedUser = null;
 let lastError = null;
-let initProgress = "Bot initializing...";
+let initProgress = 'Bot initializing...';
 const recentLogs = [];
+const recentChats = new Map();
 
 function recordLog(msg) {
   const line = `[${new Date().toISOString().slice(11, 19)}] ${msg}`;
@@ -45,282 +32,148 @@ const getStatus = () => ({
   logs: recentLogs
 });
 
+const getClient = () => sock;
+
 const connect = async () => {
-  const { Client, LocalAuth } = require("whatsapp-web.js");
-  const path = require("path");
-  const fs = require("fs");
-
-  initProgress = "1/4: Locating Chrome browser binary...";
-  recordLog("Locating Chrome executable...");
-
-  // Ensure Puppeteer uses the persistent cache directory in project root
-  const cacheDir = process.env.PUPPETEER_CACHE_DIR || path.join(__dirname, "..", "..", ".cache", "puppeteer");
-  process.env.PUPPETEER_CACHE_DIR = cacheDir;
-
-  const authDataPath = path.join(__dirname, "..", ".wwebjs_auth");
-
-  // Clean up any stale lock files from previous runs
   try {
-    const lockFiles = ["SingletonLock", "SingletonSocket", "SingletonCookie"];
-    for (const f of lockFiles) {
-      const lockPath = path.join(authDataPath, "session", f);
-      if (fs.existsSync(lockPath)) {
-        try { fs.unlinkSync(lockPath); } catch (_) {}
-      }
-    }
-  } catch (_) {}
+    initProgress = '1/4: Loading auth credentials...';
+    recordLog('Loading auth credentials...');
+    
+    const authDir = path.join(__dirname, '..', '.wwebjs_auth');
+    const { state, saveCreds } = await useMultiFileAuthState(authDir);
 
-  // Proven Puppeteer flags (no --single-process to prevent Linux renderer deadlocks)
-  const puppeteerOpts = {
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-accelerated-2d-canvas",
-      "--no-first-run",
-      "--disable-gpu"
-    ],
-  };
+    initProgress = '2/4: Connecting to WhatsApp servers...';
+    recordLog('Connecting to WhatsApp servers...');
 
-  // 0. Check system-installed Chrome/Chromium on Linux
-  if (process.platform === 'linux') {
-    const systemPaths = [
-      '/usr/bin/google-chrome',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/chromium',
-      '/usr/bin/chromium-browser',
-      '/snap/bin/chromium'
-    ];
-    for (const sp of systemPaths) {
-      if (fs.existsSync(sp)) {
-        puppeteerOpts.executablePath = sp;
-        logger.info(`WhatsApp → Using system Chrome binary: ${sp}`);
-        recordLog(`Using system Chrome: ${sp}`);
-        break;
-      }
-    }
-  }
+    sock = makeWASocket({
+      auth: state,
+      printQRInTerminal: false,
+      browser: ['JanSetu AI', 'Chrome', '122.0.0'],
+      logger: pino({ level: 'silent' }),
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: undefined,
+      keepAliveIntervalMs: 25000,
+      markOnlineOnConnect: false
+    });
 
-  // 1. Locate installed Chrome binary from Puppeteer cache or install if missing
-  if (!puppeteerOpts.executablePath) {
-    try {
-      const { getInstalledBrowsers } = require("@puppeteer/browsers");
-      const installed = await getInstalledBrowsers({ cacheDir });
-      const chromeBrowser = installed.find(b => b.browser === 'chrome' && fs.existsSync(b.executablePath));
+    sock.ev.on('creds.update', saveCreds);
+
+    sock.ev.on('connection.update', (update) => {
+      const { connection, lastDisconnect, qr } = update;
       
-      if (chromeBrowser) {
-        puppeteerOpts.executablePath = chromeBrowser.executablePath;
-        logger.info(`WhatsApp → Found installed Chrome in cache: ${chromeBrowser.executablePath}`);
-        recordLog(`Found Chrome in cache: ${path.basename(chromeBrowser.executablePath)}`);
-        if (process.platform !== 'win32') {
-          try { fs.chmodSync(chromeBrowser.executablePath, 0o755); } catch (_) {}
-        }
-      } else {
-        logger.info("WhatsApp → Chrome binary not in cache. Calling automated Chrome installer...");
-        initProgress = "Downloading Chrome binary (first run)...";
-        recordLog("Downloading Chrome binary for Linux...");
-        const { ensureChrome } = require("../install-chrome");
-        const exe = await ensureChrome();
-        if (exe && fs.existsSync(exe)) {
-          puppeteerOpts.executablePath = exe;
-          logger.info(`WhatsApp → Installed Chrome and set executable: ${exe}`);
-          recordLog(`Installed Chrome at ${exe}`);
+      if (qr) {
+        currentQr = qr;
+        isReady = false;
+        lastError = null;
+        initProgress = '4/4: QR Code ready! Scan with phone number 6361163002.';
+        recordLog('📱 QR Code generated! Available at /qr');
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        logger.info('  📱  SCAN THIS QR CODE WITH WHATSAPP');
+        logger.info('  WhatsApp → ⋮ Menu → Linked Devices → Link a Device');
+        logger.info('  🌐 Or view QR in browser: /qr');
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        qrcode.generate(qr, { small: true });
+      }
+
+      if (connection === 'open') {
+        isReady = true;
+        currentQr = null;
+        lastError = null;
+        connectedUser = sock.user?.name || sock.user?.verifiedName || 'JanSetu Civic Bot';
+        initProgress = `Connected as ${connectedUser}!`;
+        recordLog(`✅ Connected as ${connectedUser}`);
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        logger.info(`  ✅ WhatsApp connected! (as ${connectedUser})`);
+        logger.info('  🤖 Bot is online and receiving messages.');
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }
+
+      if (connection === 'close') {
+        const shouldReconnect = (lastDisconnect?.error instanceof Boom)
+          ? lastDisconnect.error.output?.statusCode !== DisconnectReason.loggedOut
+          : true;
+
+        if (shouldReconnect) {
+          lastError = `Disconnected. Reconnecting...`;
+          recordLog(`⚠️ ${lastError}`);
+          logger.warn(`WhatsApp disconnected. Reconnecting in 5s...`);
+          setTimeout(() => {
+            connect().catch(() => {});
+          }, 5000);
+        } else {
+          lastError = 'Logged out. Delete auth folder and restart.';
+          initProgress = lastError;
+          recordLog(`❌ ${lastError}`);
+          logger.error(lastError);
         }
       }
-    } catch (err) {
-      logger.warn(`WhatsApp → Chrome locator notice: ${err.message}`);
-      recordLog(`Chrome locator note: ${err.message}`);
-    }
-  }
+    });
 
-  initProgress = "2/4: Initializing WhatsApp Web client...";
-  recordLog("Creating Client with LocalAuth...");
+    sock.ev.on('messages.upsert', async (m) => {
+      if (m.type === 'notify') {
+        for (const msg of m.messages) {
+          if (!msg.key.fromMe) {
+            await handleMessage(msg);
+          }
+        }
+      }
+    });
 
-  client = new Client({
-    authStrategy: new LocalAuth({ dataPath: authDataPath }),
-    authTimeoutMs: 90000,
-    qrMaxRetries: 15,
-    puppeteer: puppeteerOpts,
-    userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    webVersionCache: {
-      type: "remote",
-      remotePath: "https://raw.githubusercontent.com/wwebjs/web-whatsapp/main/dist/web-whatsapp.html"
-    }
-  });
-
-  // ── QR code ───────────────────────────────────────────────────────────────
-  client.on("qr", (qr) => {
-    currentQr = qr;
-    isReady = false;
-    lastError = null;
-    initProgress = "QR Code ready! Scan with phone number 6361163002.";
-    recordLog("📱 QR Code generated! Available at /qr");
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    logger.info("  📱  SCAN THIS QR CODE WITH WHATSAPP");
-    logger.info("  WhatsApp → ⋮ Menu → Linked Devices → Link a Device");
-    logger.info("  🌐 Or view QR in browser: /qr");
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    qrcode.generate(qr, { small: true });
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    logger.info("  ⏳ Waiting for you to scan… (QR refreshes every 20s if not scanned)");
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  });
-
-  // ── Ready ─────────────────────────────────────────────────────────────────
-  client.on("ready", () => {
-    isReady = true;
-    currentQr = null;
-    lastError = null;
-    connectedUser = client.info?.pushname || "JanSetu Civic Bot";
-    initProgress = `Connected as ${connectedUser}!`;
-    recordLog(`✅ Connected as ${connectedUser}`);
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    logger.info(`  ✅ WhatsApp connected! (as ${connectedUser})`);
-    logger.info("  🤖 Bot is online and receiving messages.");
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  });
-
-  // ── Auth failure ──────────────────────────────────────────────────────────
-  client.on("auth_failure", (msg) => {
-    lastError = `WhatsApp auth failed: ${msg}`;
-    initProgress = lastError;
-    recordLog(`❌ ${lastError}`);
-    logger.error(lastError);
-    logger.warn("Delete session folder and restart to re-scan QR.");
-  });
-
-  // ── Disconnected ──────────────────────────────────────────────────────────
-  let reconnecting = false;
-  client.on("disconnected", (reason) => {
-    lastError = `Disconnected: ${reason}`;
-    recordLog(`⚠️ ${lastError}`);
-    logger.warn(`WhatsApp disconnected: ${reason}. Reconnecting in 10s…`);
-    if (reconnecting) return;
-    reconnecting = true;
-    setTimeout(async () => {
-      try { await client.destroy(); } catch (_) {}
-      reconnecting = false;
-      connect().catch(() => {});
-    }, 10000);
-  });
-
-  // ── Incoming messages ─────────────────────────────────────────────────────
-  client.on("message", async (msg) => {
-    await handleMessage(msg);
-  });
-
-  // ── Start ─────────────────────────────────────────────────────────────────
-  initProgress = "3/4: Loading web.whatsapp.com in Chromium...";
-  recordLog("Navigating to WhatsApp Web in Chromium...");
-  try {
-    await client.initialize();
   } catch (err) {
     lastError = err.message;
-    initProgress = `Browser initialization error: ${err.message}`;
+    initProgress = `Initialization error: ${err.message}`;
     recordLog(`❌ Initialize error: ${err.message}`);
     logger.error(`WhatsApp → Failed to initialize: ${err.message}`);
   }
 };
 
-const { downloadAndDecryptMedia } = require("../utils/whatsappMediaDecryptor");
-
-// Robust media downloader with live terminal percentage tracking and CDN decryption
-const downloadMediaWithProgress = async (msg, label = "Media") => {
+const downloadMediaWithProgress = async (msg, label = 'Media') => {
   logger.info(`WhatsApp → Starting download for ${label}...`);
-
-  const directPath = msg._data?.directPath || msg.directPath;
-  const mediaKey = msg.mediaKey || msg._data?.mediaKey;
-  const mimetype = msg._data?.mimetype || msg.mimetype;
-  const size = msg._data?.size || msg.size;
-  const type = msg.type || msg._data?.type;
-
-  // 1. Direct Node CDN Download & HKDFv3 AES Decryption
-  if (directPath && mediaKey) {
-    try {
-      const cdnResult = await downloadAndDecryptMedia({
-        directPath,
-        mediaKey,
-        type,
-        mimetype,
-        size,
-        label
-      });
-      if (cdnResult && cdnResult.data) {
-        return cdnResult;
-      }
-    } catch (err) {
-      logger.warn(`WhatsApp CDN download attempt error: ${err.message}`);
+  try {
+    const buffer = await downloadMediaMessage(
+      msg, 'buffer', {},
+      { logger: pino({ level: 'silent' }), reuploadRequest: sock.updateMediaMessage }
+    );
+    if (buffer && buffer.length > 50) {
+      const sizeKb = Math.round(buffer.length / 1024);
+      logger.info(`WhatsApp → ✅ ${label} downloaded (${sizeKb} KB)`);
+      return {
+        data: buffer.toString('base64'),
+        mimetype: msg.message?.audioMessage?.mimetype || msg.message?.imageMessage?.mimetype || 'application/octet-stream'
+      };
     }
+  } catch (err) {
+    logger.warn(`WhatsApp → ${label} download error: ${err.message}`);
   }
-
-  // 2. Browser-side retry fallback
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    try {
-      if (attempt === 1) await new Promise((r) => setTimeout(r, 800));
-      const media = await msg.downloadMedia();
-      if (media && media.data && media.data.length > 50) {
-        const sizeKb = Math.round((media.data.length * 3 / 4) / 1024);
-        logger.info(`WhatsApp → ✅ ${label} downloaded via WhatsApp Web (100% - ${sizeKb} KB)`);
-        return media;
-      }
-    } catch (err) {
-      logger.info(`WhatsApp → ⏳ Waiting for media stream (attempt ${attempt})...`);
-    }
-    if (attempt < 4) {
-      await new Promise((r) => setTimeout(r, 1500));
-    }
-  }
-
-  logger.warn(`WhatsApp → ⚠️ ${label} download timed out`);
   return null;
 };
 
-/**
- * Handle incoming WhatsApp messages
- */
 const handleMessage = async (msg) => {
   try {
-    if (msg.fromMe) return;
-
-    const sender = msg.from;
-
-    // Cache active chat instance for instant notification delivery
-    try {
-      const chat = await msg.getChat();
-      if (chat) {
-        recentChats.set(sender, chat);
-        if (chat.id?._serialized) recentChats.set(chat.id._serialized, chat);
-        if (chat.id?.user) recentChats.set(chat.id.user, chat);
-        const senderDigits = sender.replace(/[^0-9]/g, '');
-        if (senderDigits) recentChats.set(senderDigits, chat);
-      }
-    } catch (_) {}
+    const sender = msg.key.remoteJid;
     if (!sender) return;
 
-    // Ignore WhatsApp Status/Story broadcasts — not real chat messages
-    if (sender === "status@broadcast") return;
-    if (sender.endsWith("@broadcast")) return;
+    if (sender === 'status@broadcast' || sender.endsWith('@broadcast')) return;
 
-    // Rate limiting
     if (!rateLimiter.isAllowed(sender)) {
       logger.warn(`bot → rate-limited: ${sender}`);
       return;
     }
 
-    const text = msg.body || "";
-    const hasImage = msg.hasMedia && (msg.type === "image" || (msg.mimetype && msg.mimetype.startsWith("image/")));
-    const hasAudio = msg.hasMedia && (msg.type === "ptt" || msg.type === "audio" || (msg.mimetype && msg.mimetype.startsWith("audio/")));
-    const hasLocation = msg.type === "location" || !!msg.location;
+    const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+    const hasImage = !!msg.message?.imageMessage;
+    const hasAudio = !!msg.message?.audioMessage;
+    const hasLocation = !!msg.message?.locationMessage;
 
     if (!text && !hasImage && !hasAudio && !hasLocation) return;
 
     logger.info(`bot → msg from ${sender} | text=${text.length} | audio=${hasAudio} | img=${hasImage} | loc=${hasLocation}`);
 
-    // Typing indicator (may fail on queued messages during initial sync)
+    recentChats.set(sender, { lastSeen: Date.now() });
+
     try {
-      const chat = await msg.getChat();
-      await chat.sendStateTyping();
+      await sock.presenceSubscribe(sender);
+      await sock.sendPresenceUpdate('composing', sender);
     } catch (_) {}
 
     let audioData = null;
@@ -329,26 +182,27 @@ const handleMessage = async (msg) => {
     let imageMime = null;
 
     if (hasAudio) {
-      const media = await downloadMediaWithProgress(msg, "Voice Note 🎤");
+      const media = await downloadMediaWithProgress(msg, 'Voice Note 🎤');
       if (media && media.data) {
         audioData = media.data;
-        audioMime = media.mimetype || "audio/ogg";
+        audioMime = media.mimetype;
       }
     }
 
     if (hasImage) {
-      const media = await downloadMediaWithProgress(msg, "Photo 📷");
+      const media = await downloadMediaWithProgress(msg, 'Photo 📷');
       if (media && media.data) {
         imageData = media.data;
-        imageMime = media.mimetype || "image/jpeg";
+        imageMime = media.mimetype;
       }
     }
 
-    const locPayload = (hasLocation && (msg.location || msg._data?.lat))
+    const locMsg = msg.message?.locationMessage;
+    const locPayload = hasLocation && locMsg
       ? {
-          lat: parseFloat(msg.location?.latitude || msg.location?.lat || msg._data?.lat || msg.lat),
-          lng: parseFloat(msg.location?.longitude || msg.location?.lng || msg._data?.lng || msg.lng),
-          name: msg.location?.name || msg.location?.description || null
+          lat: locMsg.degreesLatitude,
+          lng: locMsg.degreesLongitude,
+          name: locMsg.name || locMsg.address || null
         }
       : null;
 
@@ -356,16 +210,14 @@ const handleMessage = async (msg) => {
       logger.info(`bot → parsed location pin: (${locPayload.lat.toFixed(5)}, ${locPayload.lng.toFixed(5)})`);
     }
 
-    // Send direct message helper for 3-minute timeout callback
     const sendDirectMessage = async (to, content) => {
       try {
-        if (client) await client.sendMessage(to, content);
+        if (sock) await sock.sendMessage(to, { text: content });
       } catch (e) {
         logger.error(`Direct message error: ${e.message}`);
       }
     };
 
-    // Process via Gemini Bot Multi-Step Intake Engine
     const response = await geminiBotService.handleCitizenInput({
       sender,
       text,
@@ -385,15 +237,10 @@ const handleMessage = async (msg) => {
       for (let i = 0; i < msgsToSend.length; i++) {
         const item = msgsToSend[i];
         if (i === 0) {
-          await msg.reply(item);
+          await sock.sendMessage(sender, { text: item }, { quoted: msg });
         } else {
           await new Promise((r) => setTimeout(r, 600));
-          try {
-            const chat = await msg.getChat();
-            await chat.sendMessage(item);
-          } catch (_) {
-            if (client) await client.sendMessage(sender, item);
-          }
+          await sock.sendMessage(sender, { text: item });
         }
       }
       logger.info(`bot → replied to ${sender} | type=${response.type} | count=${msgsToSend.length}`);
@@ -401,14 +248,11 @@ const handleMessage = async (msg) => {
   } catch (err) {
     logger.error(`bot → message handler error: ${err.message}`);
     try {
-      await msg.reply("⚠️ An error occurred processing your request. Please try again or visit http://localhost:3000");
+      await sock.sendMessage(msg.key.remoteJid, { text: "⚠️ An error occurred processing your request. Please try again or visit http://localhost:3000" });
     } catch (_) {}
   }
 };
 
-/**
- * Format structured civic reply with PMGSY defect matching.
- */
 const formatReply = (data) => {
   const { reference_number, category, severity, potential_impact, defect_matching_notice, ai_analysis } = data || {};
   const voiceProcessed = ai_analysis?.voice_processed;
@@ -443,117 +287,34 @@ const formatReply = (data) => {
   return out;
 };
 
-const getClient = () => client;
-
-/**
- * Send an outbound proactive notification to a user by phone or serialized ID
- */
 const sendWhatsAppNotification = async (target, content) => {
-  if (!client) {
-    logger.warn("sendWhatsAppNotification: WhatsApp client is not initialized.");
-    return false;
-  }
-
-  logger.info(`WhatsApp → Outbound notification targeting: ${target}`);
-
+  if (!sock) return false;
+  
   const rawDigits = (target || '').replace(/[^0-9]/g, '');
   const digits10 = rawDigits.length > 10 ? rawDigits.slice(-10) : rawDigits;
-
-  // 1. Direct key match in recentChats
-  if (recentChats.has(target)) {
-    try {
-      const chat = recentChats.get(target);
-      await chat.sendMessage(content);
-      logger.info(`WhatsApp → ✅ Notification delivered via direct cached chat: ${target}`);
-      return true;
-    } catch (cachedErr) {
-      logger.warn(`WhatsApp → Cached chat delivery error: ${cachedErr.message}`);
-    }
-  }
-
-  if (rawDigits && recentChats.has(rawDigits)) {
-    try {
-      const chat = recentChats.get(rawDigits);
-      await chat.sendMessage(content);
-      logger.info(`WhatsApp → ✅ Notification delivered via digits cached chat: ${rawDigits}`);
-      return true;
-    } catch (cachedErr) {
-      logger.warn(`WhatsApp → Cached chat digits delivery error: ${cachedErr.message}`);
-    }
-  }
-
-  // 2. Iterate all recentChats looking for matching 10 digits
-  if (digits10 && digits10.length >= 8) {
-    for (const [key, chat] of recentChats.entries()) {
-      const chatId = chat.id ? (chat.id._serialized || '') : '';
-      const chatUser = chat.id ? (chat.id.user || '') : '';
-      if (key.includes(digits10) || chatId.includes(digits10) || chatUser.includes(digits10)) {
-        try {
-          await chat.sendMessage(content);
-          logger.info(`WhatsApp → ✅ Notification delivered via matching active chat (${chatId})`);
-          return true;
-        } catch (err) {
-          logger.warn(`WhatsApp → recentChat send error: ${err.message}`);
-        }
-      }
-    }
-  }
-
-  // 3. Search active loaded chats in browser memory
-  try {
-    const chats = await client.getChats();
-    for (const chat of chats) {
-      const chatId = chat.id ? (chat.id._serialized || '') : '';
-      const chatUser = chat.id ? (chat.id.user || '') : '';
-      if (chatId === target || (digits10 && (chatId.includes(digits10) || chatUser.includes(digits10)))) {
-        await chat.sendMessage(content);
-        logger.info(`WhatsApp → ✅ Notification delivered via browser active chat: ${chatId}`);
-        recentChats.set(target, chat);
-        if (digits10) recentChats.set(digits10, chat);
-        return true;
-      }
-    }
-  } catch (err) {
-    logger.warn(`WhatsApp → getChats search warning: ${err.message}`);
-  }
-
-  // 4. Fallback candidates (international prefixes)
+  
   const candidates = [];
-  if (target.includes('@')) {
-    candidates.push(target);
-  }
+  if (target.includes('@')) candidates.push(target);
   if (digits10 && digits10.length === 10) {
-    candidates.push(`91${digits10}@c.us`);
-    candidates.push(`91${digits10}@lid`);
-    candidates.push(`${digits10}@c.us`);
-    candidates.push(`${digits10}@lid`);
+    candidates.push(`91${digits10}@s.whatsapp.net`);
   } else if (rawDigits.length >= 10) {
-    candidates.push(`${rawDigits}@c.us`);
-    candidates.push(`${rawDigits}@lid`);
+    candidates.push(`${rawDigits}@s.whatsapp.net`);
   }
-
-  for (const cand of [...new Set(candidates)]) {
+  
+  for (const [key] of recentChats.entries()) {
+    if (key.includes(digits10)) candidates.push(key);
+  }
+  
+  for (const jid of [...new Set(candidates)]) {
     try {
-      await client.sendMessage(cand, content);
-      logger.info(`WhatsApp → ✅ Notification delivered directly to ${cand}`);
+      await sock.sendMessage(jid, { text: content });
+      logger.info(`WhatsApp → ✅ Notification delivered to ${jid}`);
       return true;
     } catch (e) {
-      logger.warn(`WhatsApp → Direct send to ${cand} warning: ${e.message}`);
+      logger.warn(`WhatsApp → Send to ${jid} failed: ${e.message}`);
     }
   }
-
-  // 5. If we have any recent active chat, fallback to it
-  if (recentChats.size > 0) {
-    try {
-      const firstChat = recentChats.values().next().value;
-      if (firstChat) {
-        await firstChat.sendMessage(content);
-        logger.info(`WhatsApp → ✅ Notification delivered via recent active chat fallback`);
-        return true;
-      }
-    } catch (e) {}
-  }
-
+  
   return false;
 };
 

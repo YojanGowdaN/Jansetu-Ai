@@ -203,7 +203,8 @@ function handleShutdown() {
   if (waBot) {
     try {
       const c = waBot.getClient();
-      if (c) c.destroy();
+      if (c && typeof c.end === 'function') c.end();
+      else if (c && typeof c.destroy === 'function') c.destroy();
     } catch (e) {}
   }
   process.exit(0);

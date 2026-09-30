@@ -130,9 +130,9 @@ const renderQrPage = (_req, res) => {
       <div style="background:#0F172A;padding:2.5rem;border-radius:1.5rem;text-align:center;max-width:440px;width:100%;border:1px solid #1E293B;">
         <div style="font-size:2.8rem;margin-bottom:1rem;">⏳</div>
         <h2 style="margin:0 0 0.5rem 0;color:#F59E0B;font-size:1.35rem;">Connecting WhatsApp Bot...</h2>
-        <p style="color:#E2E8F0;font-size:0.85rem;line-height:1.5;margin-bottom:1rem;"><b>Status:</b> ${status.progress || 'Starting browser session on Render...'}</p>
+        <p style="color:#E2E8F0;font-size:0.85rem;line-height:1.5;margin-bottom:1rem;"><b>Status:</b> ${status.progress || 'Connecting to WhatsApp via WebSocket...'}</p>
         <div style="background:#1E293B;padding:0.75rem;border-radius:0.75rem;margin:1rem 0;">
-          ${logsHtml || '<div style="color:#64748B;font-size:0.75rem;">Initializing Chromium and WhatsApp Web...</div>'}
+          ${logsHtml || '<div style="color:#64748B;font-size:0.75rem;">Connecting to WhatsApp servers via WebSocket...</div>'}
         </div>
         <p style="color:#64748B;font-size:0.75rem;margin-top:1.5rem;">Checking status every 4 seconds...</p>
       </div>
@@ -150,7 +150,8 @@ router.get("/restart-bot", async (_req, res) => {
     const { connect, getClient } = require("../bot/whatsapp");
     try {
       const c = getClient();
-      if (c) await c.destroy();
+      if (c && typeof c.end === 'function') c.end();
+      else if (c && typeof c.destroy === 'function') await c.destroy();
     } catch (_) {}
     connect().catch(e => console.warn('Restart notice:', e.message));
     res.redirect("/qr");

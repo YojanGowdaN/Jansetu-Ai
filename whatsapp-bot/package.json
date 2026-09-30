@@ -1,7 +1,7 @@
 {
-  "name": "sentinel-whatsapp-bot",
-  "version": "1.0.0",
-  "description": "WhatsApp AI Fake News Detection Bot — Sentinel AI (Hackathon Ready)",
+  "name": "jansetu-whatsapp-bot",
+  "version": "2.0.0",
+  "description": "JanSetu AI — WhatsApp Civic Bot (Baileys WebSocket — Zero Chrome/Puppeteer)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,22 +12,25 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.16",
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
+    "link-preview-js": "^3.0.5",
     "pino": "^8.16.0",
-    "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "^1.23.0"
+    "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
   "keywords": [
     "whatsapp-bot",
-    "fake-news",
-    "sentinel-ai"
+    "jansetu-ai",
+    "baileys",
+    "civic-intelligence"
   ],
-  "author": "Sentinel AI Team",
+  "author": "JanSetu AI Team",
   "license": "MIT"
 }
