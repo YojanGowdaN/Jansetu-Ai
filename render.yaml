@@ -1,0 +1,46 @@
+# ==============================================================================
+# JANSETU AI — RENDER DEPLOYMENT BLUEPRINT (render.yaml)
+# ==============================================================================
+# This blueprint allows 1-click zero-config deployment on Render (render.com).
+# It starts the complete platform:
+#   • Central REST API & Gemini AI Engine
+#   • Citizen Reporting Web Portal
+#   • Authority Command Dashboard
+#   • WhatsApp Bot Microservice
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Main Unified Web Platform (All-In-One: Backend + Citizen + Authority)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: jansetu-ai
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      # Google Gemini API Key (Enter in Render Dashboard -> Environment)
+      - key: GEMINI_API_KEY
+        sync: false
+
+      # Gemini Model Selection
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+
+      # Cryptographic JWT Secret (Render generates a secure random string)
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 200

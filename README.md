@@ -136,46 +136,140 @@ jansetu-ai/
 - **npm**: v9.0.0 or higher
 - **Google Gemini API Key**: [Google AI Studio](https://aistudio.google.com/)
 
-### 2. Configure Environment
-Create a `.env` file in `backend/` and `whatsapp-bot/` (or use the root `.env`):
+### 2. Configure Environment Variables (`.env`)
+
+JanSetu AI requires environment variables configured for the backend intelligence engine and the WhatsApp bot microservice.
+
+#### Step 2.1: Get Your Free Google Gemini API Key
+1. Go to [Google AI Studio](https://aistudio.google.com/).
+2. Click **"Get API key"** and create a new key.
+3. Copy your API key.
+
+#### Step 2.2: Create `.env` Files
+You can quickly create `.env` files by copying the provided `.env.example` templates:
+
+**For Windows (PowerShell):**
+```powershell
+# In root directory
+Copy-Item .env.example .env
+
+# In backend directory
+Copy-Item backend\.env.example backend\.env
+
+# In whatsapp-bot directory
+Copy-Item whatsapp-bot\.env.example whatsapp-bot\.env
+```
+
+**For macOS / Linux (Bash):**
+```bash
+# In root directory
+cp .env.example .env
+
+# In backend directory
+cp backend/.env.example backend/.env
+
+# In whatsapp-bot directory
+cp whatsapp-bot/.env.example whatsapp-bot/.env
+```
+
+---
+
+#### Step 2.3: Populate the `.env` Files
+
+##### 🔹 `backend/.env` (Core API & Gemini AI Service):
+Create or edit `backend/.env`:
 ```env
+# Google Gemini API Key (Required for Multimodal AI Analysis & Audio Transcription)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Model Selection (Default: gemini-2.5-flash or gemini-2.0-flash)
+GEMINI_MODEL=gemini-2.5-flash
+
+# Server Configuration
 PORT=5000
+NODE_ENV=development
+API_BASE_URL=http://localhost:5000
+
+# JSON Web Token Secret for Authority & Citizen Authentication
+JWT_SECRET=jansetu_super_secret_jwt_key_2026
+
+# Rate Limiting Settings
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+```
+
+##### 🔹 `whatsapp-bot/.env` (Citizen WhatsApp Microservice):
+Create or edit `whatsapp-bot/.env`:
+```env
+PORT=3001
+SENTINEL_API_URL=http://localhost:5000
+
+# Gemini API Key (Same as backend key)
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
-JWT_SECRET=jansetu_super_secret_jwt_key_2026
+
+# Default WhatsApp Bot Phone (Country code + 10 digits without + or spaces)
+WHATSAPP_PHONE=916361163002
+
+ALERT_SECRET=sentinel_cyber_intelligence_secret_2024
+FAKE_CONFIDENCE_THRESHOLD=90
+RATE_LIMIT_MAX=10
+RATE_LIMIT_WINDOW_MS=60000
+CACHE_TTL_MS=600000
+NODE_ENV=development
 ```
 
-### 3. Start the Backend Engine
-```powershell
-cd backend
-npm install
-npm start
-```
-*Backend runs on `http://localhost:5000` (Health Check: `http://localhost:5000/health`)*
+| Variable | Description | Default / Example | Required |
+|---|---|---|---|
+| `GEMINI_API_KEY` | Google Gemini API Key for voice transcription, image inspection, and copilot reasoning | `AIzaSy...` | **Yes** |
+| `GEMINI_MODEL` | Gemini model identifier | `gemini-2.5-flash` | Optional |
+| `PORT` | Local service port | `5000` (Backend) / `3001` (Bot) | **Yes** |
+| `JWT_SECRET` | Secret key used to sign citizen & authority JWT tokens | `jansetu_secret_2026` | **Yes** |
+| `WHATSAPP_PHONE` | Admin/Notification phone number for WhatsApp alerts | `916361163002` | Optional |
 
-### 4. Start the Citizen Public Web Portal
-```powershell
-cd public-web
-npm install
-npm start
-```
-*Open `http://localhost:3000` in your browser.*
+> 💡 **Fallback Mode**: If `GEMINI_API_KEY` is not provided, JanSetu AI will automatically switch to built-in rule-based fallback classifiers so the platform remains fully functional for demonstration.
 
-### 5. Start the Authority Command Portal
-```powershell
-cd authority-web
-npm install
-npm start
-```
-*Open `http://localhost:3002` in your browser.*
+---
 
-### 6. Start the Citizen WhatsApp Bot
+### 3. 🚀 1-Command Startup (Starts ALL 4 Services Together!)
+
+You can now start the **entire JanSetu AI ecosystem** (Backend REST API + Public Citizen Web + Authority Command Center + WhatsApp Bot) with a **single command** from the root folder:
+
 ```powershell
-cd whatsapp-bot
+# Install root dependencies (once)
 npm install
+
+# Start ALL 4 services concurrently in 1 command
 npm start
 ```
-*Scan the terminal QR code using WhatsApp (*Linked Devices $\rightarrow$ Link a Device*).*
+
+This single command boots up:
+- 🌐 **Unified Web Platform**: `http://localhost:5000`
+- 👥 **Public Citizen Portal**: `http://localhost:3000` (or `http://localhost:5000/`)
+- 🏛️ **Authority Command Cockpit**: `http://localhost:3002` (or `http://localhost:5000/authority`)
+- 🤖 **Citizen WhatsApp Bot**: Runs on port `3001` and connects to WhatsApp in the background!
+- 📋 **Health Probe**: `http://localhost:5000/health`
+
+---
+
+### ☁️ 4. Deploying to Render (Cloud Hosting)
+
+JanSetu AI is pre-configured for **Render (render.com)** cloud hosting:
+- 📖 **Full Step-by-Step Hosting Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md).
+- ⚙️ **Infrastructure-as-Code**: Includes official [render.yaml](render.yaml) blueprint.
+- 💡 **Free Tier Compatible**: Deploys as a single unified web service at **$0/month**!
+
+---
+
+### 5. Alternative: Running Individual Services Separately
+
+If you prefer running services in separate terminal windows:
+```powershell
+npm run start:backend     # Port 5000 (Backend API & Gemini)
+npm run start:public      # Port 3000 (Public Citizen Portal)
+npm run start:authority   # Port 3002 (Authority Command Web)
+npm run start:bot         # Port 3001 (Citizen WhatsApp Bot)
+```
 
 ---
 

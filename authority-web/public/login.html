@@ -197,7 +197,10 @@
     </footer>
 
     <script>
-        const API_BASE = 'http://localhost:5000/api';
+        const API_BASE = window.JANSETU_API_BASE || 
+            (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? (window.location.port === '3000' || window.location.port === '3002' ? `http://${window.location.hostname}:5000/api` : '/api')
+                : '/api');
 
         // ─── Theme Controller (Default Light Mode) ───────────────────────────
         function updateThemeUI() {
@@ -230,7 +233,8 @@
 
         // Check if already logged in
         if (localStorage.getItem('auth_token') && localStorage.getItem('auth_user')) {
-            window.location.href = '/dashboard';
+            const dest = window.location.pathname.startsWith('/authority') ? '/authority/dashboard' : '/dashboard';
+            window.location.href = dest;
         }
 
         function selectRole(email, pass, name, role, btnEl) {
@@ -272,7 +276,8 @@
                     localStorage.setItem('auth_token', data.token);
                     localStorage.setItem('auth_user', JSON.stringify(data.user));
                     btnText.textContent = 'Access Granted!';
-                    setTimeout(() => { window.location.href = '/dashboard'; }, 600);
+                    const dest = window.location.pathname.startsWith('/authority') ? '/authority/dashboard' : '/dashboard';
+                    setTimeout(() => { window.location.href = dest; }, 600);
                 } else {
                     errBox.textContent = data.error || 'Invalid credentials.';
                     errBox.classList.remove('hidden');
