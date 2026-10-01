@@ -17,7 +17,16 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
 const logger = require("../utils/logger");
 
-const INGEST_URL = `${process.env.SENTINEL_API_URL || "http://localhost:5000"}/api/signals/ingest`;
+// On Render: unified server runs at PORT (10000), so ingest is on same host
+const MAIN_PORT = process.env.PORT || 10000;
+const INGEST_URL = process.env.SENTINEL_API_URL
+  ? `${process.env.SENTINEL_API_URL}/api/signals/ingest`
+  : `http://localhost:${MAIN_PORT}/api/signals/ingest`;
+
+// Public-facing URL for tracking links sent to citizens
+const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL
+  || process.env.PUBLIC_WEB_URL
+  || `http://localhost:${MAIN_PORT}`;
 
 // In-Memory Active Intake Sessions & User Complaint History
 const activeSessions = new Map(); // sender -> Session
@@ -428,6 +437,12 @@ _How can I help your community today?_`;
       return await this._finalizeComplaint(sender, session, { isNonVisual: true });
     }
 
+    // ─── SKIP Step 3 if citizen ALREADY sent an image in Step 1 ────────────────
+    if (session.imageData) {
+      logger.info(`Photo already provided at Step 1 — skipping Step 3 (Ref: ${session.refNumber}).`);
+      return await this._finalizeComplaint(sender, session, { hasPhoto: true });
+    }
+
     session.step = "WAITING_IMAGE";
 
     // Set 3-minute auto-finalize timer
@@ -778,7 +793,7 @@ Return a JSON object:
       }
       out += `━━━━━━━━━━━━━━━━━━━━\n`;
       out += `ನಿಮ್ಮ ದೂರನ್ನು ಸಂಬಂಧಪಟ್ಟ ಕ್ಷೇತ್ರ ಇಂಜಿನಿಯರ್ ಹಾಗೂ ಜಿಲ್ಲಾಧಿಕಾರಿಗಳ ಕಮಾಂಡ್ ಸೆಂಟರ್‌ಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.\n\n`;
-      out += `ಸ್ಥಿತಿ ಪರಿಶೀಲಿಸಲು:\nhttp://localhost:3000/track?ref=${s.refNumber}\n\n`;
+      out += `ಸ್ಥಿತಿ ಪರಿಶೀಲಿಸಲು:\n${PUBLIC_URL}/track?ref=${s.refNumber}\n\n`;
       out += `_ಹೊಸ ದೂರನ್ನು ದಾಖಲಿಸಲು ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಸಂದೇಶ ಕಳುಹಿಸಿ!_\n_ಜನಸೇತು AI — ಧನ್ಯವಾದಗಳು._`;
       return out;
     }
@@ -791,7 +806,7 @@ Return a JSON object:
       out += `📍 *स्थान:* GPS Tagged\n`;
       if (hasPhoto) out += `📷 *फोटो:* AI क्षति विश्लेषण पूर्ण (${s.imageAnalysis?.summary || "क्षति की पुष्टि"})\n`;
       out += `━━━━━━━━━━━━━━━━━━━━\n`;
-      out += `स्थिति की जांच करें:\nhttp://localhost:3000/track?ref=${s.refNumber}\n\n`;
+      out += `स्थिति की जांच करें:\n${PUBLIC_URL}/track?ref=${s.refNumber}\n\n`;
       out += `_नई शिकायत दर्ज करने के लिए कभी भी संदेश भेजें!_`;
       return out;
     }
@@ -806,19 +821,19 @@ Return a JSON object:
     }
     out += `━━━━━━━━━━━━━━━━━━━━\n`;
     out += `Your complaint has been routed to the local engineering department.\n\n`;
-    out += `Track progress live on public portal:\nhttp://localhost:3000/track?ref=${s.refNumber}\n\n`;
+    out += `Track progress live on public portal:\n${PUBLIC_URL}/track?ref=${s.refNumber}\n\n`;
     out += `_You can now register another complaint anytime._\n_JanSetu AI — Thank you!_`;
     return out;
   }
 
   _formatDuplicateAlert(d, lang) {
     if (lang === "kn") {
-      return `⚠️ *ದೂರು ಈಗಾಗಲೇ ದಾಖಲಾಗಿದೆ! (Complaint Already Registered)*\n━━━━━━━━━━━━━━━━━━━━\nನೀವು ಈ ಸಮಸ್ಯೆಯನ್ನು ಈಗಾಗಲೇ ದಾಖಲಿಸಿದ್ದೀರಿ:\n\n🔢 *ಉಲ್ಲೇಖ ಸಂಖ್ಯೆ (Ticket Ref):* ${d.refNumber}\n📌 *ವರ್ಗ:* ${d.category}\n📅 *ದಿನಾಂಕ:* ${new Date(d.createdAt).toLocaleDateString("en-IN")}\n⚡ *ಸ್ಥಿತಿ:* ${d.status}\n━━━━━━━━━━━━━━━━━━━━\nಸಂಬಂಧಪಟ್ಟ ಅಧಿಕಾರಿಗಳು ಈ ದೂರನ್ನು ಈಗಾಗಲೇ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದಾರೆ.\n\nಸ್ಥಿತಿ ತಿಳಿಯಲು:\nhttp://localhost:3000/track?ref=${d.refNumber}`;
+      return `⚠️ *ದೂರು ಈಗಾಗಲೇ ದಾಖಲಾಗಿದೆ! (Complaint Already Registered)*\n━━━━━━━━━━━━━━━━━━━━\nನೀವು ಈ ಸಮಸ್ಯೆಯನ್ನು ಈಗಾಗಲೇ ದಾಖಲಿಸಿದ್ದೀರಿ:\n\n🔢 *ಉಲ್ಲೇಖ ಸಂಖ್ಯೆ (Ticket Ref):* ${d.refNumber}\n📌 *ವರ್ಗ:* ${d.category}\n📅 *ದಿನಾಂಕ:* ${new Date(d.createdAt).toLocaleDateString("en-IN")}\n⚡ *ಸ್ಥಿತಿ:* ${d.status}\n━━━━━━━━━━━━━━━━━━━━\nಸಂಬಂಧಪಟ್ಟ ಅಧಿಕಾರಿಗಳು ಈ ದೂರನ್ನು ಈಗಾಗಲೇ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದಾರೆ.\n\nಸ್ಥಿತಿ ತಿಳಿಯಲು:\n${PUBLIC_URL}/track?ref=${d.refNumber}`;
     }
     if (lang === "hi") {
-      return `⚠️ *शिकायत पहले से दर्ज है! (Already Registered)*\n━━━━━━━━━━━━━━━━━━━━\nआपने यह समस्या पहले ही दर्ज कराई है:\n\n🔢 *टिकट संदर्भ संख्या:* ${d.refNumber}\n📌 *श्रेणी:* ${d.category}\n📅 *तारीख:* ${new Date(d.createdAt).toLocaleDateString("en-IN")}\n⚡ *स्थिति:* ${d.status}\n━━━━━━━━━━━━━━━━━━━━\nअधिकारी पहले से इस पर कार्रवाई कर रहे हैं।\n\nजांच करें: http://localhost:3000/track?ref=${d.refNumber}`;
+      return `⚠️ *शिकायत पहले से दर्ज है! (Already Registered)*\n━━━━━━━━━━━━━━━━━━━━\nआपने यह समस्या पहले ही दर्ज कराई है:\n\n🔢 *टिकट संदर्भ संख्या:* ${d.refNumber}\n📌 *श्रेणी:* ${d.category}\n📅 *तारीख:* ${new Date(d.createdAt).toLocaleDateString("en-IN")}\n⚡ *स्थिति:* ${d.status}\n━━━━━━━━━━━━━━━━━━━━\nअधिकारी पहले से इस पर कार्रवाई कर रहे हैं।\n\nजांच करें: ${PUBLIC_URL}/track?ref=${d.refNumber}`;
     }
-    return `⚠️ *Complaint Already Registered!*\n━━━━━━━━━━━━━━━━━━━━\nYou have already reported this issue recently:\n\n🔢 *Ticket Reference:* ${d.refNumber}\n📌 *Category:* ${d.category}\n📅 *Date Reported:* ${new Date(d.createdAt).toLocaleDateString("en-IN")}\n⚡ *Current Status:* ${d.status}\n━━━━━━━━━━━━━━━━━━━━\nAuthorities are actively processing this request.\n\nTrack status: http://localhost:3000/track?ref=${d.refNumber}`;
+    return `⚠️ *Complaint Already Registered!*\n━━━━━━━━━━━━━━━━━━━━\nYou have already reported this issue recently:\n\n🔢 *Ticket Reference:* ${d.refNumber}\n📌 *Category:* ${d.category}\n📅 *Date Reported:* ${new Date(d.createdAt).toLocaleDateString("en-IN")}\n⚡ *Current Status:* ${d.status}\n━━━━━━━━━━━━━━━━━━━━\nAuthorities are actively processing this request.\n\nTrack status: ${PUBLIC_URL}/track?ref=${d.refNumber}`;
   }
 
   _checkButtonAction(text) {

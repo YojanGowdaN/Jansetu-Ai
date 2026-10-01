@@ -248,7 +248,8 @@ const handleMessage = async (msg) => {
   } catch (err) {
     logger.error(`bot → message handler error: ${err.message}`);
     try {
-      await sock.sendMessage(msg.key.remoteJid, { text: "⚠️ An error occurred processing your request. Please try again or visit http://localhost:3000" });
+      const errUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 10000}`;
+      await sock.sendMessage(msg.key.remoteJid, { text: `⚠️ An error occurred processing your request. Please try again or visit ${errUrl}` });
     } catch (_) {}
   }
 };
@@ -281,7 +282,8 @@ const formatReply = (data) => {
     out += `\n⚠️ *INFRASTRUCTURE NOTICE:*\n${defect_matching_notice}\n`;
   }
 
-  out += `\nTrack status on public portal:\nhttp://localhost:3000/track?ref=${reference_number || "JS-2026"}\n\n`;
+  const TRACK_URL = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_WEB_URL || `http://localhost:${process.env.PORT || 10000}`;
+  out += `\nTrack status on public portal:\n${TRACK_URL}/track?ref=${reference_number || "JS-2026"}\n\n`;
   out += `_JanSetu AI — From Citizen Voices to National Development Intelligence_`;
 
   return out;
