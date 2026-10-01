@@ -25,17 +25,17 @@ const userHistory = new Map();    // sender -> Array<Complaint>
 
 class GeminiBotService {
   constructor() {
-    this.apiKey = process.env.GEMINI_API_KEY || "AQ.Ab8RN6Ir_rKeJRCI5wefmDKZHuQ4LPCU-9OfXgv0cUpVDm6SMg";
-    this.modelName = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+    this.apiKey = process.env.GEMINI_API_KEY || "";
+    this.modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     this.genAI = null;
     this._init();
   }
 
   _init() {
-    this.apiKey = process.env.GEMINI_API_KEY || "AQ.Ab8RN6Ir_rKeJRCI5wefmDKZHuQ4LPCU-9OfXgv0cUpVDm6SMg";
-    if (this.apiKey && this.apiKey.length > 5) {
+    this.apiKey = process.env.GEMINI_API_KEY || "";
+    if (this.apiKey && this.apiKey.trim().length > 5) {
       try {
-        this.genAI = new GoogleGenerativeAI(this.apiKey);
+        this.genAI = new GoogleGenerativeAI(this.apiKey.trim());
       } catch (e) {
         logger.warn(`Gemini init error: ${e.message}`);
       }
@@ -47,11 +47,16 @@ class GeminiBotService {
     if (!this.genAI) return null;
 
     const modelsToTry = [
-      "gemini-3.5-flash-lite",
-      "gemini-3.6-flash"
-    ];
+      this.modelName,
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-1.5-pro"
+    ].filter(Boolean);
 
-    for (const m of modelsToTry) {
+    const uniqueModels = [...new Set(modelsToTry)];
+
+    for (const m of uniqueModels) {
       try {
         const model = this.genAI.getGenerativeModel({ model: m });
         const res = await fn(model);

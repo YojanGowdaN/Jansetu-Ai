@@ -65,8 +65,9 @@ class SpeechService {
 
       const modelsToTry = [
         this.configuredModel,
-        'gemini-3.6-flash',
-        'gemini-3.5-flash-lite'
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-2.0-flash-lite'
       ].filter(Boolean);
 
       const inlineData = {
