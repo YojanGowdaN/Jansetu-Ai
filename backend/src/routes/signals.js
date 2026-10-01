@@ -217,7 +217,7 @@ router.post('/ingest', async (req, res) => {
           phone_number: resolvedPhone,
           category: aiResult.category,
           location: resolvedLoc.generalized_location_str || 'Local Jurisdiction',
-          language: voiceLanguage || aiResult.language || 'kn',
+          language: voiceLanguage || aiResult.language || 'en',
           summary: aiResult.problem_summary || text || ''
         })
       }).catch(err => {

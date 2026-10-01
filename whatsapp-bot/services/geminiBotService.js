@@ -17,11 +17,10 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
 const logger = require("../utils/logger");
 
-// On Render: unified server runs at PORT (10000), so ingest is on same host
+// On Render: unified server runs at PORT (10000), so ingest is on same host.
+// Always use the unified server port — SENTINEL_API_URL is legacy and should not be used.
 const MAIN_PORT = process.env.PORT || 10000;
-const INGEST_URL = process.env.SENTINEL_API_URL
-  ? `${process.env.SENTINEL_API_URL}/api/signals/ingest`
-  : `http://localhost:${MAIN_PORT}/api/signals/ingest`;
+const INGEST_URL = `http://localhost:${MAIN_PORT}/api/signals/ingest`;
 
 // Public-facing URL for tracking links sent to citizens
 const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL
@@ -637,11 +636,11 @@ Return a JSON object:
       const parsed = JSON.parse(raw);
       return {
         text: parsed.problem_description || parsed.transcript,
-        language: parsed.language || "kn"
+        language: parsed.language || "en"
       };
     });
 
-    return aiResult || { text: "ಧ್ವನಿ ಸಂದೇಶದ ಮೂಲಕ ವರದಿ", language: "kn" };
+    return aiResult || { text: "Voice report submitted by citizen", language: "en" };
   }
 
   /**
@@ -654,7 +653,7 @@ Return a JSON object:
 {
   "damage_type": "e.g. Pothole / Broken Road / Water Leak / Garbage / Drainage",
   "severity": "High / Medium / Low",
-  "summary": "Brief 1-line description of visible damage in Kannada or English",
+  "summary": "Brief 1-line description of visible damage in English",
   "estimated_depth_or_scale": "e.g. Approx 15cm pothole or wide crack"
 }`;
 
@@ -672,7 +671,7 @@ Return a JSON object:
       return JSON.parse(raw);
     });
 
-    return aiResult || { damage_type: "Public Infrastructure Damage", severity: "High", summary: "ಮೂಲಸೌಕರ್ಯ ಹಾನಿ ದೃಢೀಕರಿಸಲಾಗಿದೆ", estimated_depth_or_scale: "Moderate" };
+    return aiResult || { damage_type: "Public Infrastructure Damage", severity: "High", summary: "Infrastructure damage confirmed via photo evidence", estimated_depth_or_scale: "Moderate" };
   }
 
   _checkDefectLiability(category, text) {
