@@ -58,7 +58,7 @@ router.post('/send-otp', async (req, res) => {
   // Dispatch OTP via WhatsApp Bot
   let dispatched = false;
   try {
-    const notifyRes = await fetch('http://localhost:3001/send-otp', {
+    const notifyRes = await fetch(`http://localhost:${process.env.PORT || 10000}/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

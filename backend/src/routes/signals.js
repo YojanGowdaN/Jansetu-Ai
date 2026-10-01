@@ -209,7 +209,7 @@ router.post('/ingest', async (req, res) => {
 
     // Send instant WhatsApp Registration Receipt to citizen
     if (resolvedPhone) {
-      fetch('http://localhost:3001/notify-registered', {
+      fetch(`http://localhost:${process.env.PORT || 10000}/notify-registered`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -422,7 +422,7 @@ router.patch('/:refNumber/status', (req, res) => {
   // 2. Dispatch WhatsApp Community Broadcast to ALL citizens who reported this problem
   const sendAlert = (aiUpdate = {}) => {
     targetPhones.forEach(phone => {
-      fetch('http://localhost:3001/notify-status', {
+      fetch(`http://localhost:${process.env.PORT || 10000}/notify-status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
