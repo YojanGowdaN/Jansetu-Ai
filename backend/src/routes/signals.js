@@ -311,9 +311,39 @@ router.get('/track/:refNumber', (req, res) => {
 
 /**
  * GET /api/signals/my-requests/:citizenId
+ * Also accepts ?phone=XXXXXXXXXX query param for cross-channel matching
  */
 router.get('/my-requests/:citizenId', (req, res) => {
-  const signals = db.getSignalsByCitizen(req.params.citizenId);
+  const citizenId = req.params.citizenId;
+  let signals = db.getSignalsByCitizen(citizenId);
+  
+  // Also try phone-based lookup if the citizen profile has a phone number
+  const citizen = db.findCitizenById(citizenId);
+  if (citizen && citizen.phone) {
+    const phoneSignals = db.getSignalsByCitizen(citizen.phone);
+    // Merge, avoiding duplicates by reference_number
+    const refSet = new Set(signals.map(s => s.reference_number));
+    for (const s of phoneSignals) {
+      if (!refSet.has(s.reference_number)) {
+        signals.push(s);
+        refSet.add(s.reference_number);
+      }
+    }
+  }
+
+  // Also try with phone from query param
+  const queryPhone = req.query.phone;
+  if (queryPhone) {
+    const phoneSignals = db.getSignalsByCitizen(queryPhone);
+    const refSet = new Set(signals.map(s => s.reference_number));
+    for (const s of phoneSignals) {
+      if (!refSet.has(s.reference_number)) {
+        signals.push(s);
+        refSet.add(s.reference_number);
+      }
+    }
+  }
+
   return res.json({ count: signals.length, signals });
 });
 

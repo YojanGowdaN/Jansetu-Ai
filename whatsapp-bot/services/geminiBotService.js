@@ -79,7 +79,7 @@ class GeminiBotService {
   /**
    * Main entry point for all incoming citizen WhatsApp messages.
    */
-  async handleCitizenInput({ sender, text, hasAudio, audioData, audioMime, hasImage, imageData, imageMime, hasLocation, location, sendDirectMessage }) {
+  async handleCitizenInput({ sender, phoneNumber, text, hasAudio, audioData, audioMime, hasImage, imageData, imageMime, hasLocation, location, sendDirectMessage }) {
     this._init();
 
     const cleanText = (text || "").trim();
@@ -198,6 +198,7 @@ class GeminiBotService {
       language: lang,
       voiceProcessed: voiceTranscribed,
       voiceLanguage,
+      phoneNumber: phoneNumber || null,
       imageData: imageData || null,
       imageMime: imageMime || null,
       imageAnalysis: imageAnalysis || null,
@@ -472,12 +473,18 @@ _How can I help your community today?_`;
 
   async _ingestToBackend(sender, session) {
     try {
+      // Use resolved phone number for citizen identity linking.
+      // If phoneNumber was resolved from LID, use the last 10 digits for matching with website accounts.
+      const rawPhone = session.phoneNumber || sender;
+      const phoneDigits = rawPhone.replace(/[^0-9]/g, '');
+      const phone10 = phoneDigits.length > 10 ? phoneDigits.slice(-10) : phoneDigits;
+      
       const resp = await axios.post(
         INGEST_URL,
         {
           reference_number: session.refNumber,
-          phone_number: sender,
-          citizen_id: sender,
+          phone_number: phone10 || sender,
+          citizen_id: phone10 || sender,
           text: session.rawText,
           language: session.language,
           location: session.location || { lat: 12.3551, lng: 77.2142, district: "Mandya", state: "Karnataka" },
@@ -492,7 +499,7 @@ _How can I help your community today?_`;
       if (resp.data && resp.data.reference_number) {
         session.refNumber = resp.data.reference_number;
       }
-      logger.info(`✅ Complaint ${session.refNumber} persisted to database and live on portal.`);
+      logger.info(`✅ Complaint ${session.refNumber} persisted to database (phone: ${phone10 || sender}).`);
     } catch (err) {
       logger.warn(`Backend ingest sync warning: ${err.message}`);
     }

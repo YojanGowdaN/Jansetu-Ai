@@ -16,6 +16,7 @@ let lastError = null;
 let initProgress = 'Bot initializing...';
 const recentLogs = [];
 const recentChats = new Map();
+const lidToPhone = new Map(); // Maps LID JIDs to actual phone JIDs
 
 function recordLog(msg) {
   const line = `[${new Date().toISOString().slice(11, 19)}] ${msg}`;
@@ -119,6 +120,28 @@ const connect = async () => {
       }
     });
 
+    // Build LID → phone number mapping from contacts
+    sock.ev.on('contacts.upsert', (contacts) => {
+      for (const contact of contacts) {
+        if (contact.lid && contact.id && contact.id.endsWith('@s.whatsapp.net')) {
+          lidToPhone.set(contact.lid, contact.id);
+        }
+        if (contact.id?.endsWith('@lid') && contact.lid?.endsWith('@s.whatsapp.net')) {
+          lidToPhone.set(contact.id, contact.lid);
+        }
+      }
+    });
+
+    sock.ev.on('contacts.update', (contacts) => {
+      for (const contact of contacts) {
+        if (contact.id?.endsWith('@lid')) {
+          // Try to find phone JID from other fields
+          const phoneJid = contact.notify || contact.verifiedName;
+          if (!phoneJid) continue;
+        }
+      }
+    });
+
   } catch (err) {
     lastError = err.message;
     initProgress = `Initialization error: ${err.message}`;
@@ -146,6 +169,33 @@ const downloadMediaWithProgress = async (msg, label = 'Media') => {
     logger.warn(`WhatsApp → ${label} download error: ${err.message}`);
   }
   return null;
+};
+
+/**
+ * Resolve actual phone number from any WhatsApp JID format.
+ * - `919876543210@s.whatsapp.net` → `919876543210`
+ * - `919876543210@c.us` → `919876543210`
+ * - `29175964508165@lid` → lookup from lidToPhone map, or null
+ */
+const resolvePhoneNumber = (jid) => {
+  if (!jid) return null;
+  
+  // Standard phone JID: 919876543210@s.whatsapp.net or @c.us
+  if (jid.endsWith('@s.whatsapp.net') || jid.endsWith('@c.us')) {
+    return jid.split('@')[0];
+  }
+  
+  // LID format: try the contacts mapping
+  if (jid.endsWith('@lid')) {
+    const phoneJid = lidToPhone.get(jid);
+    if (phoneJid) {
+      return phoneJid.split('@')[0];
+    }
+    // LID doesn't contain the phone number — return null
+    return null;
+  }
+  
+  return jid.split('@')[0];
 };
 
 const handleMessage = async (msg) => {
@@ -218,8 +268,15 @@ const handleMessage = async (msg) => {
       }
     };
 
+    // Resolve actual phone number from JID for citizen identity linking
+    const resolvedPhone = resolvePhoneNumber(sender);
+    if (resolvedPhone) {
+      logger.info(`bot → resolved phone for ${sender}: ${resolvedPhone}`);
+    }
+
     const response = await geminiBotService.handleCitizenInput({
       sender,
+      phoneNumber: resolvedPhone,
       text,
       hasAudio,
       audioData,

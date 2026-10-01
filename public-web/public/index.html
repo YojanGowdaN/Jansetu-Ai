@@ -877,7 +877,8 @@
 
             try {
                 const citizenId = currentUser?.id || 'CIT-001';
-                const res = await fetch(`${API_BASE}/signals/my-requests/${citizenId}`);
+                const phoneParam = currentUser?.phone ? `?phone=${encodeURIComponent(currentUser.phone)}` : '';
+                const res = await fetch(`${API_BASE}/signals/my-requests/${citizenId}${phoneParam}`);
                 const data = await res.json();
 
                 loading.classList.add('hidden');
